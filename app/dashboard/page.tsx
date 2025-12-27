@@ -1,11 +1,11 @@
-import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-helpers";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
 
+  // Le middleware garantit que l'utilisateur est connecté
   if (!user) {
-    redirect("/auth/signin");
+    return null;
   }
 
   return (

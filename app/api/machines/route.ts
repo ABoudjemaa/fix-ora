@@ -4,6 +4,53 @@ import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { machineSchema } from "@/lib/validations/machine";
 
+export async function GET(request: NextRequest) {
+  try {
+    // Vérifier l'authentification
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Non authentifié" },
+        { status: 401 }
+      );
+    }
+
+    // Vérifier que c'est une entreprise
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { company: true },
+    });
+
+    if (!user?.company) {
+      return NextResponse.json(
+        { error: "Accès refusé. Seules les entreprises peuvent accéder aux machines." },
+        { status: 403 }
+      );
+    }
+
+    // Récupérer les machines avec leurs maintenances
+    const machines = await prisma.machine.findMany({
+      where: {
+        companyId: user.company.userId,
+      },
+      include: {
+        maintenances: true,
+      },
+      orderBy: {
+        createdAtRecord: "desc",
+      },
+    });
+
+    return NextResponse.json({ machines }, { status: 200 });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des machines:", error);
+    return NextResponse.json(
+      { error: "Une erreur est survenue lors de la récupération des machines" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Vérifier l'authentification

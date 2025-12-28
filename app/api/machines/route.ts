@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { machineSchema } from "@/lib/validations/machine";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Vérifier l'authentification
     const session = await auth();

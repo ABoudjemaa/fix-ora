@@ -81,27 +81,6 @@ export const MachinesColumns = (router: { push: (path: string) => void }): Colum
       },
     },
     {
-      accessorKey: "maintenances",
-      header: "Maintenances",
-      cell: ({ row }) => {
-        const maintenances = row.getValue("maintenances") as Machine["maintenances"]
-        return (
-          <div className="flex flex-wrap gap-1">
-            {maintenances.length > 0 ? (
-              maintenances.map((maintenance) => (
-                <Badge key={maintenance.id} variant="outline">
-                  {maintenance.name}
-                </Badge>
-              ))
-            ) : (
-              <span className="text-muted-foreground text-sm">Aucune</span>
-            )}
-          </div>
-        )
-      },
-      enableSorting: false,
-    },
-    {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {

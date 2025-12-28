@@ -3,7 +3,6 @@
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
-// import { TeamSwitcher } from "@/components/team-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +12,7 @@ import {
 } from "@/components/ui/sidebar"
 import { sidebarData } from "@/data/sidebar-date"
 import { useSession } from "next-auth/react"
-// This is sample data.
+import Image from "next/image";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
@@ -22,8 +21,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        {/* <TeamSwitcher teams={sidebarData.teams} /> */}
+      <SidebarHeader className="flex justify-center items-center" >
+        <Image src="/logo.png" alt="logo" width={100} height={100} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={sidebarData.navMain} />

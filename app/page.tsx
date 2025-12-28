@@ -4,137 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Wrench,
   Cog,
   Calendar,
   Bell,
-  Menu,
   CheckCircle2,
   ArrowRight,
-  Mail,
-  FileText,
-  Shield,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { Footer } from "@/components/footer";
+import { Navbar } from "@/components/navbar";
 
   export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header / Navbar */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/logo.png"
-                alt="Fix-ora"
-                width={32}
-                height={32}
-                className="h-8 w-8"
-              />
-              <span className="text-xl font-bold">Fix-ora</span>
-            </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-6">
-              <Link
-                href="#"
-                className="text-sm font-medium transition-colors hover:text-primary"
-              >
-                Accueil
-              </Link>
-              <Link
-                href="#fonctionnalites"
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-              >
-                Fonctionnalités
-              </Link>
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-              >
-                Machines
-              </Link>
-              <Link
-                href="#notifications"
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-              >
-                Notifications
-              </Link>
-              <Link
-                href="#contact"
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-              >
-                Contact
-              </Link>
-            </nav>
-
-            <div className="hidden md:flex items-center gap-3">
-              <Button variant="ghost" asChild>
-                <Link href="/login">Se connecter</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/login">Créer un compte</Link>
-              </Button>
-            </div>
-
-            {/* Mobile Menu */}
-            <Sheet>
-              <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                <nav className="flex flex-col gap-4 mt-8">
-                  <Link
-                    href="#"
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                  >
-                    Accueil
-                  </Link>
-                  <Link
-                    href="#fonctionnalites"
-                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    Fonctionnalités
-                  </Link>
-                  <Link
-                    href="/dashboard"
-                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    Machines
-                  </Link>
-                  <Link
-                    href="#notifications"
-                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    Notifications
-                  </Link>
-                  <Link
-                    href="#contact"
-                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    Contact
-                  </Link>
-                  <Separator className="my-4" />
-                  <Button variant="outline" asChild className="w-full">
-                    <Link href="/login">Se connecter</Link>
-                  </Button>
-                  <Button asChild className="w-full">
-                    <Link href="/login">Créer un compte</Link>
-                  </Button>
-                </nav>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      </header>
-
+      <Navbar />
       {/* Hero Section */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
         <div className="flex flex-col items-center text-center gap-8 max-w-3xl mx-auto">
@@ -411,89 +297,8 @@ import Link from "next/link";
           </Button>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer id="contact" className="border-t bg-muted/50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Image
-                  src="/logo.png"
-                  alt="Fix-ora"
-                  width={24}
-                  height={24}
-                  className="h-6 w-6"
-                />
-                <span className="font-bold">Fix-ora</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Gestion intelligente de maintenance
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="font-semibold">Légal</h3>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link
-                    href="#"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Mentions légales
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Politique de confidentialité
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="font-semibold">Contact</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2 text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                  <span>contact@fix-ora.com</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="font-semibold">Ressources</h3>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link
-                    href="#fonctionnalites"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Fonctionnalités
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/dashboard"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Tableau de bord
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <Separator className="my-8" />
-
-          <div className="text-center text-sm text-muted-foreground">
-            <p>© {new Date().getFullYear()} Fix-ora – Gestion intelligente de maintenance</p>
-          </div>
-        </div>
-      </footer>
+      
+      <Footer />
     </div>
   );
 }

@@ -5,20 +5,39 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String     @id @default(uuid())
+  email         String     @unique
   password      String
-  firstName     String
-  lastName      String
-  phone         String
-  birthYear     Int
-  address       String
-  skills        String[]
-  otherSkills   String?
-  message       String?
+  status        UserStatus @default(ACTIVE)
   emailVerified DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  company       Company?
+
+  @@index([email])
+  @@index([status])
+}
+
+model Company {
+  userId   String   @id
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name     String
+  crn      String   @unique @map("commercialRegisterNumber")
+  phone    String?
+  address  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([crn])
+  @@map("companies")
 }

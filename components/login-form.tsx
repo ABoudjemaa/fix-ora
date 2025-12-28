@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -21,10 +22,20 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get("registered") === "true") {
+      setSuccess("Compte créé avec succès. Bienvenue sur Fix-ora.")
+      // Nettoyer l'URL
+      router.replace("/login", { scroll: false })
+    }
+  }, [searchParams, router])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -63,6 +74,11 @@ export function LoginForm({
                   Login to your Acme Inc account
                 </p>
               </div>
+              {success && (
+                <div className="rounded-md bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                  {success}
+                </div>
+              )}
               {error && (
                 <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
                   {error}
@@ -105,7 +121,10 @@ export function LoginForm({
                 </Button>
               </Field>
               <FieldDescription className="text-center">
-                Don&apos;t have an account? <a href="#">Sign up</a>
+                Vous n&apos;avez pas de compte ?{" "}
+                <Link href="/register" className="underline-offset-2 hover:underline">
+                  S&apos;inscrire
+                </Link>
               </FieldDescription>
             </FieldGroup>
           </form>

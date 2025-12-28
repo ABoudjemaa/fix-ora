@@ -13,6 +13,7 @@
     "create-user": "tsx scripts/create-user.ts"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@radix-ui/react-avatar": "^1.1.11",
@@ -34,7 +35,9 @@
     "prisma": "^7.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "tailwind-merge": "^3.4.0"
+    "react-hook-form": "^7.69.0",
+    "tailwind-merge": "^3.4.0",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -29,7 +29,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavProjects projects={sidebarData.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={{ name: data?.user.name || "", email: data?.user.email || "", avatar: data?.user.id || "" }} />
+        <NavUser user={{ name: data?.user.name || "", email: data?.user.email || "", avatar: "" }} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -49,6 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             name: user.company.name,
             role: "COMPANY",
             accountType: "company",
+            companyId: user.company.userId, // Stocker le companyId dans le token
           };
         }
 
@@ -78,6 +79,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.name = user.name;
         token.role = (user as any).role;
         token.accountType = (user as any).accountType;
+        token.companyId = (user as any).companyId; // Stocker le companyId dans le token
       }
       return token;
     },
@@ -88,6 +90,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.name = token.name as string | null | undefined;
         (session.user as any).role = token.role;
         (session.user as any).accountType = token.accountType;
+        (session.user as any).companyId = token.companyId; // Passer le companyId à la session
       }
       return session;
     },

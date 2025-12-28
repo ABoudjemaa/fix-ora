@@ -15,26 +15,34 @@ export async function GET() {
       );
     }
 
-    // Vérifier que c'est une entreprise
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: { company: true },
-    });
-
-    if (!user?.company) {
+    // Récupérer le companyId depuis le token JWT (évite une requête DB)
+    const companyId = (session.user as any).companyId;
+    
+    if (!companyId) {
       return NextResponse.json(
         { error: "Accès refusé. Seules les entreprises peuvent accéder aux machines." },
         { status: 403 }
       );
     }
 
-    // Récupérer les machines avec leurs maintenances
+    // Récupérer directement les machines avec leurs maintenances (une seule requête optimisée)
     const machines = await prisma.machine.findMany({
       where: {
-        companyId: user.company.userId,
+        companyId: companyId,
       },
       include: {
-        maintenances: true,
+        maintenances: {
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            lifespanHours: true,
+            lastReplacementDate: true,
+            machineId: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
       },
       orderBy: {
         createdAtRecord: "desc",

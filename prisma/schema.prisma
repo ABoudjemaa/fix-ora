@@ -38,6 +38,48 @@ model Company {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  machines Machine[]
+
   @@index([crn])
   @@map("companies")
+}
+
+enum MaintenanceType {
+  PIECE
+  VIDANGE
+}
+
+model Machine {
+  id                String      @id @default(uuid())
+  name              String
+  serialNumber      String      @unique
+  createdAt         DateTime
+  notificationHours Int
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [userId], onDelete: Cascade)
+
+  maintenances      Maintenance[]
+
+  createdAtRecord   DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([companyId])
+  @@index([serialNumber])
+  @@map("machines")
+}
+
+model Maintenance {
+  id                 String          @id @default(uuid())
+  name               String
+  type               MaintenanceType
+  lifespanHours      Int
+  lastReplacementDate DateTime
+  machineId          String
+  machine            Machine         @relation(fields: [machineId], references: [id], onDelete: Cascade)
+
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@index([machineId])
+  @@map("maintenances")
 }

@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import { MachineForm } from "@/components/machine-form"
+
+export const metadata: Metadata = {
+  title: "Ajouter une machine",
+  description: "Ajoutez une nouvelle machine à votre parc d'équipements industriels. Enregistrez les informations essentielles pour un suivi optimal de la maintenance.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function AddMachinePage() {
   return (

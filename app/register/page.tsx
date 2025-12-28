@@ -1,4 +1,20 @@
+import type { Metadata } from "next";
 import { RegisterForm } from "@/components/register-form"
+
+export const metadata: Metadata = {
+  title: "Inscription",
+  description: "Créez votre compte Fix-ora et commencez à gérer efficacement la maintenance de vos machines industrielles. Inscription gratuite et rapide.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+  openGraph: {
+    title: "Inscription - Fix-ora",
+    description: "Créez votre compte Fix-ora et commencez à gérer efficacement la maintenance de vos machines industrielles.",
+    url: "/register",
+    type: "website",
+  },
+};
 
 export default function RegisterPage() {
   return (

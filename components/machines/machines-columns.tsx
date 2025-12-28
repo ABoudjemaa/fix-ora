@@ -8,7 +8,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
 import { DataTableColumnHeader } from "@/components/data-table-column-header"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"

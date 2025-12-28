@@ -1,7 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -16,9 +22,9 @@ import Link from "next/link";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 
-  export default function Home() {
+export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col w-full">
       {/* Header / Navbar */}
       <Navbar />
       {/* Hero Section */}
@@ -47,7 +53,12 @@ import { Navbar } from "@/components/navbar";
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="w-full sm:w-auto"
+            >
               <Link href="#fonctionnalites">Voir les fonctionnalités</Link>
             </Button>
           </div>
@@ -57,144 +68,146 @@ import { Navbar } from "@/components/navbar";
       {/* Section Fonctionnalités clés */}
       <section
         id="fonctionnalites"
-        className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-muted/50"
+        className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-muted/50"
       >
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Fonctionnalités clés
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Toutes les fonctionnalités dont vous avez besoin pour optimiser la
-            maintenance de vos équipements industriels
-          </p>
-        </div>
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Fonctionnalités clés
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Toutes les fonctionnalités dont vous avez besoin pour optimiser la
+              maintenance de vos équipements industriels
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {/* Gestion des machines */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Cog className="h-6 w-6 text-primary" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            {/* Gestion des machines */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Cog className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Gestion des machines</CardTitle>
                 </div>
-                <CardTitle>Gestion des machines</CardTitle>
-              </div>
-              <CardDescription>
-                Centralisez toutes les informations de vos équipements
-                industriels en un seul endroit
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Nom, numéro de série, date de création</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Suivi des heures d&apos;utilisation</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Historique complet des interventions</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+                <CardDescription>
+                  Centralisez toutes les informations de vos équipements
+                  industriels en un seul endroit
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Nom, numéro de série, date de création</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Suivi des heures d&apos;utilisation</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Historique complet des interventions</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
 
-          {/* Suivi des pièces */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Wrench className="h-6 w-6 text-primary" />
+            {/* Suivi des pièces */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Wrench className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Suivi des pièces</CardTitle>
                 </div>
-                <CardTitle>Suivi des pièces</CardTitle>
-              </div>
-              <CardDescription>
-                Gérez efficacement le remplacement des pièces de vos machines
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Pièces à remplacer identifiées</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Durée de vie en heures</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Alertes avant échéance</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+                <CardDescription>
+                  Gérez efficacement le remplacement des pièces de vos machines
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Pièces à remplacer identifiées</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Durée de vie en heures</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Alertes avant échéance</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
 
-          {/* Maintenance & vidanges */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Calendar className="h-6 w-6 text-primary" />
+            {/* Maintenance & vidanges */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Calendar className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Maintenance & vidanges</CardTitle>
                 </div>
-                <CardTitle>Maintenance & vidanges</CardTitle>
-              </div>
-              <CardDescription>
-                Planifiez et suivez toutes vos opérations de maintenance
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Historique complet des interventions</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Prochaines opérations planifiées</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Calendrier de maintenance</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+                <CardDescription>
+                  Planifiez et suivez toutes vos opérations de maintenance
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Historique complet des interventions</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Prochaines opérations planifiées</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Calendrier de maintenance</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
 
-          {/* Notifications automatiques */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Bell className="h-6 w-6 text-primary" />
+            {/* Notifications automatiques */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Bell className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Notifications automatiques</CardTitle>
                 </div>
-                <CardTitle>Notifications automatiques</CardTitle>
-              </div>
-              <CardDescription>
-                Recevez des alertes par e-mail selon le nombre d&apos;heures
-                d&apos;utilisation
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Alertes par e-mail avant échéance</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Notifications personnalisables</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Rappels de maintenance préventive</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+                <CardDescription>
+                  Recevez des alertes par e-mail selon le nombre d&apos;heures
+                  d&apos;utilisation
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Alertes par e-mail avant échéance</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Notifications personnalisables</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Rappels de maintenance préventive</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 
@@ -279,8 +292,8 @@ import { Navbar } from "@/components/navbar";
       </section>
 
       {/* Section Call To Action */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-primary text-primary-foreground">
-        <div className="max-w-2xl mx-auto text-center">
+      <section className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-primary text-primary-foreground">
+        <div className="container mx-auto max-w-2xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">
             Passez d&apos;une maintenance réactive à une maintenance
             intelligente.
@@ -297,7 +310,7 @@ import { Navbar } from "@/components/navbar";
           </Button>
         </div>
       </section>
-      
+
       <Footer />
     </div>
   );

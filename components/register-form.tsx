@@ -146,6 +146,22 @@ export function RegisterForm({
                 )}
               </Field>
               <Field>
+                <FieldLabel htmlFor="ownerName">Nom du propriétaire</FieldLabel>
+                <Input
+                  id="ownerName"
+                  type="text"
+                  placeholder="Jean Dupont"
+                  {...register("ownerName")}
+                  disabled={loading}
+                  aria-invalid={errors.ownerName ? "true" : "false"}
+                />
+                {errors.ownerName && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                    {errors.ownerName.message}
+                  </p>
+                )}
+              </Field>
+              <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
@@ -176,6 +192,38 @@ export function RegisterForm({
                 {errors.crn && (
                   <p className="text-sm text-red-600 dark:text-red-400 mt-1">
                     {errors.crn.message}
+                  </p>
+                )}
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="phone">Téléphone</FieldLabel>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+33 1 23 45 67 89"
+                  {...register("phone")}
+                  disabled={loading}
+                  aria-invalid={errors.phone ? "true" : "false"}
+                />
+                {errors.phone && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                    {errors.phone.message}
+                  </p>
+                )}
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="location">Localisation</FieldLabel>
+                <Input
+                  id="location"
+                  type="text"
+                  placeholder="Paris, France"
+                  {...register("location")}
+                  disabled={loading}
+                  aria-invalid={errors.location ? "true" : "false"}
+                />
+                {errors.location && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                    {errors.location.message}
                   </p>
                 )}
               </Field>

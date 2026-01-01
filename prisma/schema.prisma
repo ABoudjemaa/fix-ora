@@ -31,9 +31,10 @@ model Company {
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   name     String
+  ownerName String
   crn      String   @unique @map("commercialRegisterNumber")
   phone    String?
-  address  String?
+  location String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

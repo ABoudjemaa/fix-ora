@@ -52,7 +52,10 @@ export async function POST(request: NextRequest) {
       data: {
         userId: user.id,
         name: validatedData.name,
+        ownerName: validatedData.ownerName,
         crn: validatedData.crn,
+        phone: validatedData.phone,
+        location: validatedData.location,
       },
       include: {
         user: true,

@@ -1,5 +1,4 @@
 import {
-  Settings2,
   Computer,
   Bell,
 } from "lucide-react";
@@ -38,18 +37,5 @@ export const sidebarData = {
         },
       ],
     },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      isActive: false,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [],
+  ]
 };

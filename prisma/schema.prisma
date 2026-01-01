@@ -46,23 +46,24 @@ model Company {
 }
 
 enum MaintenanceType {
-  PIECE
-  VIDANGE
+  PART
+  OIL
 }
 
 model Machine {
-  id                String      @id @default(uuid())
-  name              String
-  serialNumber      String      @unique
-  createdAt         DateTime
-  notificationHours Int
-  companyId         String
-  company           Company     @relation(fields: [companyId], references: [userId], onDelete: Cascade)
+  id                     String      @id @default(uuid())
+  name                   String
+  serialNumber           String      @unique
+  catalogLink            String?
+  operatingHours         Int         @default(0)
+  notificationAdvanceHours Int
+  companyId              String
+  company                Company     @relation(fields: [companyId], references: [userId], onDelete: Cascade)
 
-  maintenances      Maintenance[]
+  maintenances           Maintenance[]
 
-  createdAtRecord   DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  createdAtRecord        DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
 
   @@index([companyId])
   @@index([serialNumber])
@@ -70,16 +71,16 @@ model Machine {
 }
 
 model Maintenance {
-  id                 String          @id @default(uuid())
-  name               String
-  type               MaintenanceType
-  lifespanHours      Int
-  lastReplacementDate DateTime
-  machineId          String
-  machine            Machine         @relation(fields: [machineId], references: [id], onDelete: Cascade)
+  id                      String          @id @default(uuid())
+  name                    String
+  type                    MaintenanceType
+  replacementIntervalHours Int
+  lastReplacementDate       DateTime
+  machineId               String
+  machine                 Machine         @relation(fields: [machineId], references: [id], onDelete: Cascade)
 
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
 
   @@index([machineId])
   @@map("maintenances")

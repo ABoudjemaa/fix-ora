@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { ArrowLeft, Calendar, Clock, Hash, Wrench, AlertCircle } from "lucide-react"
+import { ArrowLeft, Calendar, Clock, Hash, Wrench, AlertCircle, Edit } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,15 +13,16 @@ type Machine = {
   id: string
   name: string
   serialNumber: string
-  createdAt: string
-  notificationHours: number
+  catalogLink: string | null
+  operatingHours: number
+  notificationAdvanceHours: number
   createdAtRecord: string
   updatedAt: string
   maintenances: {
     id: string
     name: string
-    type: "PIECE" | "VIDANGE"
-    lifespanHours: number
+    type: "PART" | "OIL"
+    replacementIntervalHours: number
     lastReplacementDate: string
     createdAt: string
     updatedAt: string
@@ -82,23 +83,23 @@ export default function MachineDetailsPage() {
     })
   }
 
-  const calculateNextMaintenance = (lastReplacementDate: string, lifespanHours: number) => {
+  const calculateNextMaintenance = (lastReplacementDate: string, replacementIntervalHours: number) => {
     const lastDate = new Date(lastReplacementDate)
-    const nextDate = new Date(lastDate.getTime() + lifespanHours * 60 * 60 * 1000)
+    const nextDate = new Date(lastDate.getTime() + replacementIntervalHours * 60 * 60 * 1000)
     return nextDate
   }
 
-  const getMaintenanceTypeLabel = (type: "PIECE" | "VIDANGE") => {
-    return type === "PIECE" ? "Pièce" : "Vidange"
+  const getMaintenanceTypeLabel = (type: "PART" | "OIL") => {
+    return type === "PART" ? "Pièce" : "Huile"
   }
 
-  const getMaintenanceTypeVariant = (type: "PIECE" | "VIDANGE") => {
-    return type === "PIECE" ? "default" : "secondary"
+  const getMaintenanceTypeVariant = (type: "PART" | "OIL") => {
+    return type === "PART" ? "default" : "secondary"
   }
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0 md:p-6 md:pt-0">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between gap-4">
             <Button
               variant="ghost"
               size="sm"
@@ -106,6 +107,14 @@ export default function MachineDetailsPage() {
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Retour
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push(`/dashboard/machines/${params.id}/edit`)}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Modifier
             </Button>
           </div>
 
@@ -161,12 +170,29 @@ export default function MachineDetailsPage() {
                         </div>
                       </div>
 
+                      {machine.catalogLink && (
+                        <div className="flex items-start gap-3">
+                          <Hash className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                          <div>
+                            <p className="text-sm font-medium">Lien du catalogue</p>
+                            <a
+                              href={machine.catalogLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground text-sm hover:underline"
+                            >
+                              {machine.catalogLink}
+                            </a>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-start gap-3">
-                        <Calendar className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                        <Clock className="mt-0.5 h-5 w-5 text-muted-foreground" />
                         <div>
-                          <p className="text-sm font-medium">Date de création</p>
+                          <p className="text-sm font-medium">Heures d'exploitation</p>
                           <p className="text-muted-foreground text-sm">
-                            {formatDate(machine.createdAt)}
+                            {machine.operatingHours} heures
                           </p>
                         </div>
                       </div>
@@ -174,9 +200,9 @@ export default function MachineDetailsPage() {
                       <div className="flex items-start gap-3">
                         <Clock className="mt-0.5 h-5 w-5 text-muted-foreground" />
                         <div>
-                          <p className="text-sm font-medium">Heures avant notification</p>
+                          <p className="text-sm font-medium">Heures d'avance de notification</p>
                           <p className="text-muted-foreground text-sm">
-                            {machine.notificationHours} heures
+                            {machine.notificationAdvanceHours} heures
                           </p>
                         </div>
                       </div>
@@ -232,7 +258,7 @@ export default function MachineDetailsPage() {
                       {machine.maintenances.map((maintenance) => {
                         const nextMaintenanceDate = calculateNextMaintenance(
                           maintenance.lastReplacementDate,
-                          maintenance.lifespanHours
+                          maintenance.replacementIntervalHours
                         )
                         const now = new Date()
                         const daysUntilMaintenance = Math.ceil(
@@ -255,8 +281,8 @@ export default function MachineDetailsPage() {
                                 </div>
                                 <div className="grid gap-2 text-sm md:grid-cols-2">
                                   <div>
-                                    <p className="text-muted-foreground">Durée de vie</p>
-                                    <p className="font-medium">{maintenance.lifespanHours} heures</p>
+                                    <p className="text-muted-foreground">Intervalle de remplacement</p>
+                                    <p className="font-medium">{maintenance.replacementIntervalHours} heures</p>
                                   </div>
                                   <div>
                                     <p className="text-muted-foreground">Dernier remplacement</p>

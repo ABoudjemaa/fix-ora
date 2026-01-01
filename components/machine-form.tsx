@@ -36,16 +36,17 @@ export function MachineForm({
   } = useForm<MachineFormData>({
     resolver: zodResolver(machineSchema as any),
     defaultValues: {
-      createdAt: new Date(),
       serialNumber: "",
       name: "",
-      notificationHours: 0,
+      catalogLink: "",
+      operatingHours: 0,
+      notificationAdvanceHours: 24,
       maintenances: [
         {
           name: "",
-          type: "PIECE",
-          lifespanHours: 0,
-          lastReplacementDate: new Date().toISOString().split("T")[0] as unknown as Date,
+          type: "PART",
+          replacementIntervalHours: 1000,
+          lastReplacementDate: new Date().toISOString().split("T")[0] as any,
         },
       ],
     },
@@ -56,17 +57,30 @@ export function MachineForm({
     name: "maintenances",
   })
 
-  const onSubmit = async (data: MachineFormData) => {
+  const onSubmit = async (data: any) => {
     setError("")
     setLoading(true)
 
     try {
+      // Transform dates to ISO date strings for API
+      const payload = {
+        ...data,
+        maintenances: data.maintenances.map((m: any) => ({
+          ...m,
+          lastReplacementDate: m.lastReplacementDate instanceof Date
+            ? m.lastReplacementDate.toISOString().split('T')[0]
+            : typeof m.lastReplacementDate === 'string'
+            ? m.lastReplacementDate
+            : new Date(m.lastReplacementDate).toISOString().split('T')[0],
+        })),
+      }
+
       const response = await fetch("/api/machines", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       })
 
       const result = await response.json()
@@ -177,40 +191,64 @@ export function MachineForm({
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="createdAt">Date de création</FieldLabel>
+                  <FieldLabel htmlFor="catalogLink">Lien du catalogue (optionnel)</FieldLabel>
                   <Input
-                    id="createdAt"
-                    type="date"
-                    {...register("createdAt")}
+                    id="catalogLink"
+                    type="url"
+                    placeholder="https://example.com/catalog"
+                    {...register("catalogLink")}
                     disabled={loading}
-                    aria-invalid={errors.createdAt ? "true" : "false"}
+                    aria-invalid={errors.catalogLink ? "true" : "false"}
                   />
-                  {errors.createdAt && (
+                  {errors.catalogLink && (
                     <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-                      {errors.createdAt.message}
+                      {errors.catalogLink.message}
                     </p>
                   )}
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="notificationHours">
-                    Nombre d'heures avant notification (en heures)
+                  <FieldLabel htmlFor="operatingHours">
+                    Heures d'exploitation
                   </FieldLabel>
                   <Input
-                    id="notificationHours"
+                    id="operatingHours"
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    {...register("operatingHours", { valueAsNumber: true })}
+                    disabled={loading}
+                    aria-invalid={errors.operatingHours ? "true" : "false"}
+                  />
+                  <FieldDescription>
+                    Nombre total d'heures d'exploitation de la machine
+                  </FieldDescription>
+                  {errors.operatingHours && (
+                    <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                      {errors.operatingHours.message}
+                    </p>
+                  )}
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="notificationAdvanceHours">
+                    Heures d'avance de notification
+                  </FieldLabel>
+                  <Input
+                    id="notificationAdvanceHours"
                     type="number"
                     min="1"
                     placeholder="24"
-                    {...register("notificationHours", { valueAsNumber: true })}
+                    {...register("notificationAdvanceHours", { valueAsNumber: true })}
                     disabled={loading}
-                    aria-invalid={errors.notificationHours ? "true" : "false"}
+                    aria-invalid={errors.notificationAdvanceHours ? "true" : "false"}
                   />
                   <FieldDescription>
                     Un e-mail sera envoyé lorsque le nombre d'heures restantes avant la prochaine maintenance sera inférieur à ce seuil
                   </FieldDescription>
-                  {errors.notificationHours && (
+                  {errors.notificationAdvanceHours && (
                     <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-                      {errors.notificationHours.message}
+                      {errors.notificationAdvanceHours.message}
                     </p>
                   )}
                 </Field>
@@ -229,8 +267,8 @@ export function MachineForm({
                     onClick={() =>
                       append({
                         name: "",
-                        type: "PIECE",
-                        lifespanHours: 0,
+                        type: "PART",
+                        replacementIntervalHours: 1000,
                         lastReplacementDate: new Date().toISOString().split("T")[0] as any,
                       })
                     }
@@ -296,8 +334,8 @@ export function MachineForm({
                             disabled={loading}
                             aria-invalid={errors.maintenances?.[index]?.type ? "true" : "false"}
                           >
-                            <option value="PIECE">PIECE</option>
-                            <option value="VIDANGE">VIDANGE</option>
+                            <option value="PART">PART</option>
+                            <option value="OIL">OIL</option>
                           </Select>
                           {errors.maintenances?.[index]?.type && (
                             <p className="text-sm text-red-600 dark:text-red-400 mt-1">
@@ -307,26 +345,26 @@ export function MachineForm({
                         </Field>
 
                         <Field>
-                          <FieldLabel htmlFor={`maintenances.${index}.lifespanHours`}>
-                            Durée de vie (en heures)
+                          <FieldLabel htmlFor={`maintenances.${index}.replacementIntervalHours`}>
+                            Intervalle de remplacement (en heures)
                           </FieldLabel>
                           <Input
-                            id={`maintenances.${index}.lifespanHours`}
+                            id={`maintenances.${index}.replacementIntervalHours`}
                             type="number"
                             min="1"
                             placeholder="1000"
-                            {...register(`maintenances.${index}.lifespanHours`, {
+                            {...register(`maintenances.${index}.replacementIntervalHours`, {
                               valueAsNumber: true,
                             })}
                             disabled={loading}
-                            aria-invalid={errors.maintenances?.[index]?.lifespanHours ? "true" : "false"}
+                            aria-invalid={errors.maintenances?.[index]?.replacementIntervalHours ? "true" : "false"}
                           />
                           <FieldDescription>
                             Nombre d'heures avant le remplacement de cette maintenance
                           </FieldDescription>
-                          {errors.maintenances?.[index]?.lifespanHours && (
+                          {errors.maintenances?.[index]?.replacementIntervalHours && (
                             <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-                              {errors.maintenances[index]?.lifespanHours?.message}
+                              {errors.maintenances[index]?.replacementIntervalHours?.message}
                             </p>
                           )}
                         </Field>

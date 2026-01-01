@@ -36,7 +36,7 @@ export async function GET() {
             id: true,
             name: true,
             type: true,
-            lifespanHours: true,
+            replacementIntervalHours: true,
             lastReplacementDate: true,
             machineId: true,
             createdAt: true,
@@ -105,14 +105,15 @@ export async function POST(request: NextRequest) {
       data: {
         name: validatedData.name,
         serialNumber: validatedData.serialNumber,
-        createdAt: validatedData.createdAt,
-        notificationHours: validatedData.notificationHours,
+        catalogLink: validatedData.catalogLink || null,
+        operatingHours: validatedData.operatingHours,
+        notificationAdvanceHours: validatedData.notificationAdvanceHours,
         companyId: user.company.userId,
         maintenances: {
           create: validatedData.maintenances.map((maintenance) => ({
             name: maintenance.name,
             type: maintenance.type,
-            lifespanHours: maintenance.lifespanHours,
+            replacementIntervalHours: maintenance.replacementIntervalHours,
             lastReplacementDate: maintenance.lastReplacementDate,
           })),
         },

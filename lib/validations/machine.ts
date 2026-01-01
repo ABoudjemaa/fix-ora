@@ -1,19 +1,19 @@
 import * as z from "zod";
 
-export const maintenanceTypeEnum = z.enum(["PIECE", "VIDANGE"]).refine(
-  (val) => ["PIECE", "VIDANGE"].includes(val),
+export const maintenanceTypeEnum = z.enum(["PART", "OIL"]).refine(
+  (val) => ["PART", "OIL"].includes(val),
   {
-    message: "Le type doit être PIECE ou VIDANGE",
+    message: "Le type doit être PART ou OIL",
   }
 );
 
 export const maintenanceSchema = z.object({
   name: z.string().min(1, "Le nom de la maintenance est requis"),
   type: maintenanceTypeEnum,
-  lifespanHours: z
+  replacementIntervalHours: z
     .number()
-    .int("La durée de vie doit être un nombre entier")
-    .positive("La durée de vie doit être positive"),
+    .int("L'intervalle de remplacement doit être un nombre entier")
+    .positive("L'intervalle de remplacement doit être positif"),
   lastReplacementDate: z
     .string()
     .min(1, "La date du dernier remplacement est requise")
@@ -26,20 +26,65 @@ export const maintenanceSchema = z.object({
 export const machineSchema = z.object({
   name: z.string().min(1, "Le nom de la machine est requis"),
   serialNumber: z.string().min(1, "Le numéro de série est requis"),
-  createdAt: z
-    .string()
-    .min(1, "La date de création est requise")
-    .transform((str) => new Date(str))
-    .refine((date) => !isNaN(date.getTime()), {
-      message: "Date invalide",
-    }),
-  notificationHours: z
+  catalogLink: z
+    .union([
+      z.string().url("Lien du catalogue invalide"),
+      z.literal(""),
+      z.null(),
+    ])
+    .optional(),
+  operatingHours: z
     .number()
-    .int("Le nombre d'heures doit être un nombre entier")
-    .positive("Le nombre d'heures doit être positif"),
+    .int("Le nombre d'heures d'exploitation doit être un nombre entier")
+    .nonnegative("Le nombre d'heures d'exploitation doit être positif ou nul"),
+  notificationAdvanceHours: z
+    .number()
+    .int("Le nombre d'heures d'avance de notification doit être un nombre entier")
+    .positive("Le nombre d'heures d'avance de notification doit être positif"),
   maintenances: z.array(maintenanceSchema).min(1, "Au moins une maintenance est requise"),
 });
 
 export type MachineFormData = z.infer<typeof machineSchema>;
 export type MaintenanceFormData = z.infer<typeof maintenanceSchema>;
+
+// Update schemas (all fields optional)
+export const machineUpdateSchema = z.object({
+  name: z.string().min(1, "Le nom de la machine est requis").optional(),
+  serialNumber: z.string().min(1, "Le numéro de série est requis").optional(),
+  catalogLink: z
+    .union([
+      z.string().url("Lien du catalogue invalide"),
+      z.literal(""),
+      z.null(),
+    ])
+    .optional(),
+  operatingHours: z
+    .number()
+    .int("Le nombre d'heures d'exploitation doit être un nombre entier")
+    .nonnegative("Le nombre d'heures d'exploitation doit être positif ou nul")
+    .optional(),
+  notificationAdvanceHours: z
+    .number()
+    .int("Le nombre d'heures d'avance de notification doit être un nombre entier")
+    .positive("Le nombre d'heures d'avance de notification doit être positif")
+    .optional(),
+});
+
+export const maintenanceUpdateSchema = z.object({
+  name: z.string().min(1, "Le nom de la maintenance est requis").optional(),
+  type: maintenanceTypeEnum.optional(),
+  replacementIntervalHours: z
+    .number()
+    .int("L'intervalle de remplacement doit être un nombre entier")
+    .positive("L'intervalle de remplacement doit être positif")
+    .optional(),
+  lastReplacementDate: z
+    .string()
+    .min(1, "La date du dernier remplacement est requise")
+    .transform((str) => new Date(str))
+    .refine((date) => !isNaN(date.getTime()), {
+      message: "Date invalide",
+    })
+    .optional(),
+});
 

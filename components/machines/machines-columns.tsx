@@ -60,22 +60,22 @@ export const MachinesColumns = (router: { push: (path: string) => void }): Colum
       ),
     },
     {
-      accessorKey: "createdAt",
+      accessorKey: "operatingHours",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Date de création" />
+        <DataTableColumnHeader column={column} title="Heures d'exploitation" />
       ),
       cell: ({ row }) => {
-        const date = new Date(row.getValue("createdAt"))
-        return <div>{date.toLocaleDateString("fr-FR")}</div>
+        const hours = row.getValue("operatingHours") as number
+        return <div>{hours} h</div>
       },
     },
     {
-      accessorKey: "notificationHours",
+      accessorKey: "notificationAdvanceHours",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Heures avant notification" />
+        <DataTableColumnHeader column={column} title="Heures d'avance notification" />
       ),
       cell: ({ row }) => {
-        const hours = row.getValue("notificationHours") as number
+        const hours = row.getValue("notificationAdvanceHours") as number
         return <div>{hours} h</div>
       },
     },
@@ -106,7 +106,11 @@ export const MachinesColumns = (router: { push: (path: string) => void }): Colum
               >
                 Voir les détails
               </DropdownMenuItem>
-              <DropdownMenuItem>Modifier</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push(`/dashboard/machines/${machine.id}/edit`)}
+              >
+                Modifier
+              </DropdownMenuItem>
               <DropdownMenuItem className="text-red-600">Supprimer</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

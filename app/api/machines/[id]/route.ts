@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { machineUpdateSchema } from "@/lib/validations/machine";
+import { evaluateMachineNotifications } from "@/lib/notifications";
 
 export async function GET(
   request: NextRequest,
@@ -147,6 +148,11 @@ export async function PUT(
         },
       },
     });
+
+    // Evaluate notifications if operatingHours was updated
+    if (validatedData.operatingHours !== undefined) {
+      await evaluateMachineNotifications(id);
+    }
 
     return NextResponse.json(
       {

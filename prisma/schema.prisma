@@ -50,6 +50,16 @@ enum MaintenanceType {
   OIL
 }
 
+enum NotificationUrgency {
+  APPROACHING
+  REQUIRED
+}
+
+enum NotificationStatus {
+  ACTIVE
+  SERVICE_STARTED
+}
+
 model Machine {
   id                     String      @id @default(uuid())
   name                   String
@@ -61,6 +71,7 @@ model Machine {
   company                Company     @relation(fields: [companyId], references: [userId], onDelete: Cascade)
 
   maintenances           Maintenance[]
+  notifications          Notification[]
 
   createdAtRecord        DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
@@ -82,6 +93,30 @@ model Maintenance {
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @updatedAt
 
+  notifications           Notification[]
+
   @@index([machineId])
   @@map("maintenances")
+}
+
+model Notification {
+  id              String            @id @default(uuid())
+  machineId       String
+  maintenanceId   String
+  serviceType     MaintenanceType
+  urgency         NotificationUrgency
+  status          NotificationStatus @default(ACTIVE)
+  triggeredAt     DateTime          @default(now())
+  
+  machine         Machine           @relation(fields: [machineId], references: [id], onDelete: Cascade)
+  maintenance     Maintenance       @relation(fields: [maintenanceId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([machineId])
+  @@index([status])
+  @@index([urgency])
+  @@index([maintenanceId, status])
+  @@map("notifications")
 }

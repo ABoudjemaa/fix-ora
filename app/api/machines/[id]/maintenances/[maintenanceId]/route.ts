@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { maintenanceUpdateSchema } from "@/lib/validations/machine";
+import { evaluateMachineNotifications } from "@/lib/notifications";
 
 export async function GET(
   request: NextRequest,
@@ -142,6 +143,11 @@ export async function PUT(
       where: { id: maintenanceId },
       data: updateData,
     });
+
+    // Re-evaluate notifications if lastReplacementDate was updated
+    if (validatedData.lastReplacementDate !== undefined) {
+      await evaluateMachineNotifications(id);
+    }
 
     return NextResponse.json(
       {

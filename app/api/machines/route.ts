@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { machineSchema } from "@/lib/validations/machine";
+import { evaluateMachineNotifications } from "@/lib/notifications";
 
 export async function GET() {
   try {
@@ -122,6 +123,9 @@ export async function POST(request: NextRequest) {
         maintenances: true,
       },
     });
+
+    // Evaluate notifications after machine creation
+    await evaluateMachineNotifications(machine.id);
 
     return NextResponse.json(
       {

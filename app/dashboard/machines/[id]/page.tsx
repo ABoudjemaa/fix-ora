@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { ArrowLeft, Calendar, Clock, Hash, Wrench, AlertCircle, Edit } from "lucide-react"
+import { ArrowLeft, Calendar, Clock, Hash, Wrench, AlertCircle, Edit, Play } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,6 +26,11 @@ type Machine = {
     lastReplacementDate: string
     createdAt: string
     updatedAt: string
+    notifications: {
+      id: string
+      urgency: "APPROACHING" | "REQUIRED"
+      status: "ACTIVE" | "SERVICE_STARTED"
+    }[]
   }[]
   company: {
     name: string
@@ -39,6 +44,8 @@ export default function MachineDetailsPage() {
   const [machine, setMachine] = useState<Machine | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [processing, setProcessing] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchMachine() {
@@ -97,6 +104,36 @@ export default function MachineDetailsPage() {
     return type === "PART" ? "default" : "secondary"
   }
 
+  const handleStartService = async (notificationId: string) => {
+    setProcessing(notificationId)
+    setError(null)
+    setSuccess(null)
+    try {
+      const response = await fetch(`/api/notifications/${notificationId}/start-service`, {
+        method: "POST",
+      })
+
+      if (!response.ok) {
+        const result = await response.json()
+        throw new Error(result.error || "Erreur lors du démarrage du service")
+      }
+
+      setSuccess("Service démarré avec succès")
+      // Refresh machine data
+      const id = params.id as string
+      const machineResponse = await fetch(`/api/machines/${id}`)
+      if (machineResponse.ok) {
+        const data = await machineResponse.json()
+        setMachine(data.machine)
+      }
+      setTimeout(() => setSuccess(null), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue")
+    } finally {
+      setProcessing(null)
+    }
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0 md:p-6 md:pt-0">
           <div className="flex items-center justify-between gap-4">
@@ -124,6 +161,16 @@ export default function MachineDetailsPage() {
                 <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
                   <AlertCircle className="h-5 w-5" />
                   <p>{error}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {success && (
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                  <p>{success}</p>
                 </div>
               </CardContent>
             </Card>
@@ -305,7 +352,23 @@ export default function MachineDetailsPage() {
                                 </div>
                               </div>
                             </div>
-                            {isDueSoon && (
+                            {maintenance.notifications && maintenance.notifications.length > 0 && (
+                              <div className="flex items-center gap-2 rounded-md bg-red-50 p-2 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+                                <AlertCircle className="h-4 w-4" />
+                                <span>Service requis</span>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleStartService(maintenance.notifications[0].id)}
+                                  disabled={processing === maintenance.notifications[0].id}
+                                  className="ml-auto"
+                                >
+                                  <Play className="mr-2 h-3 w-3" />
+                                  {processing === maintenance.notifications[0].id ? "Traitement..." : "Démarrer le service"}
+                                </Button>
+                              </div>
+                            )}
+                            {isDueSoon && maintenance.notifications && maintenance.notifications.length === 0 && (
                               <div className="flex items-center gap-2 rounded-md bg-orange-50 p-2 text-sm text-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
                                 <AlertCircle className="h-4 w-4" />
                                 <span>Maintenance prévue dans moins de 30 jours</span>

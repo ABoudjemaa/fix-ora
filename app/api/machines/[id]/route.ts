@@ -31,7 +31,7 @@ export async function GET(
 
     const { id } = await params;
 
-    // Récupérer la machine avec ses maintenances
+    // Récupérer la machine avec ses maintenances et notifications
     const machine = await prisma.machine.findFirst({
       where: {
         id,
@@ -39,6 +39,13 @@ export async function GET(
       },
       include: {
         maintenances: {
+          include: {
+            notifications: {
+              where: {
+                status: "ACTIVE",
+              },
+            },
+          },
           orderBy: {
             createdAt: "desc",
           },

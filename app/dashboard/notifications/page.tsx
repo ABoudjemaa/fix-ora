@@ -258,6 +258,13 @@ export default function NotificationsPage() {
                       >
                         Voir la machine
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push("/dashboard/machines/in-service")}
+                      >
+                        Machines en service
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

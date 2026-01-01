@@ -177,6 +177,8 @@ export async function evaluateMachineNotifications(machineId: string) {
           status: "SERVICE_STARTED",
         },
       });
+      // When lastReplacementDate is updated (service completed), delete SERVICE_STARTED notifications
+      // This is handled separately when maintenance is updated
     }
   }
 

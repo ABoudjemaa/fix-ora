@@ -23,13 +23,13 @@ export async function GET() {
       );
     }
 
-    // Récupérer toutes les machines qui ont au moins une notification avec status = SERVICE_STARTED
+    // Récupérer toutes les machines qui ont au moins un ServiceRecord avec status = IN_PROGRESS
     const machines = await prisma.machine.findMany({
       where: {
         companyId: companyId,
-        notifications: {
+        serviceRecords: {
           some: {
-            status: "SERVICE_STARTED",
+            status: "IN_PROGRESS",
           },
         },
       },
@@ -42,6 +42,11 @@ export async function GET() {
               },
               orderBy: {
                 triggeredAt: "desc",
+              },
+            },
+            serviceRecords: {
+              orderBy: {
+                startedAt: "desc",
               },
             },
           },

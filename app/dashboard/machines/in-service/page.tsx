@@ -32,6 +32,13 @@ type Machine = {
       status: "SERVICE_STARTED"
       triggeredAt: string
     }[]
+    serviceRecords: {
+      id: string
+      startedAt: string
+      completedAt: string | null
+      comment: string | null
+      status: "IN_PROGRESS" | "COMPLETED"
+    }[]
   }[]
   company: {
     name: string
@@ -44,8 +51,8 @@ export default function MachinesInServicePage() {
   const [machines, setMachines] = useState<Machine[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedNotification, setSelectedNotification] = useState<{
-    notificationId: string
+  const [selectedService, setSelectedService] = useState<{
+    serviceRecordId: string
     machineId: string
     maintenanceId: string
     maintenanceName: string
@@ -73,25 +80,25 @@ export default function MachinesInServicePage() {
     }
   }
 
-  const handleServiceDone = async (data: { lastReplacementDate: string }) => {
-    if (!selectedNotification) return
+  const handleServiceDone = async (data: { lastReplacementDate: string; comment?: string }) => {
+    if (!selectedService) return
 
     setProcessing(true)
     setError(null)
 
     try {
-      // Update maintenance lastReplacementDate
       // Convert date string to ISO format for API
       const dateValue = new Date(data.lastReplacementDate).toISOString()
       const response = await fetch(
-        `/api/machines/${selectedNotification.machineId}/maintenances/${selectedNotification.maintenanceId}`,
+        `/api/services/${selectedService.serviceRecordId}/complete`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             lastReplacementDate: dateValue,
+            comment: data.comment || undefined,
           }),
         }
       )
@@ -102,7 +109,7 @@ export default function MachinesInServicePage() {
       }
 
       // Close modal and refresh
-      setSelectedNotification(null)
+      setSelectedService(null)
       await fetchMachines()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue")
@@ -200,7 +207,7 @@ export default function MachinesInServicePage() {
         <div className="space-y-6">
           {machines.map((machine) => {
             const servicesInProgress = machine.maintenances.filter(
-              (m) => m.notifications && m.notifications.length > 0
+              (m) => m.serviceRecords && m.serviceRecords.some((sr) => sr.status === "IN_PROGRESS")
             )
 
             return (
@@ -241,7 +248,12 @@ export default function MachinesInServicePage() {
                       <h3 className="text-lg font-semibold mb-3">Services requis</h3>
                       <div className="space-y-3">
                         {servicesInProgress.map((maintenance) => {
+                          const serviceRecord = maintenance.serviceRecords.find(
+                            (sr) => sr.status === "IN_PROGRESS"
+                          )
                           const notification = maintenance.notifications[0]
+                          if (!serviceRecord) return null
+                          
                           return (
                             <Card key={maintenance.id} className="border-l-4 border-l-orange-500">
                               <CardContent className="p-4">
@@ -252,9 +264,11 @@ export default function MachinesInServicePage() {
                                       <Badge variant="outline">
                                         {getServiceTypeLabel(maintenance.type)}
                                       </Badge>
-                                      <Badge variant={getUrgencyVariant(notification.urgency)}>
-                                        {getUrgencyLabel(notification.urgency)}
-                                      </Badge>
+                                      {notification && (
+                                        <Badge variant={getUrgencyVariant(notification.urgency)}>
+                                          {getUrgencyLabel(notification.urgency)}
+                                        </Badge>
+                                      )}
                                     </div>
                                     <div className="grid gap-2 text-sm md:grid-cols-2">
                                       <div>
@@ -270,15 +284,15 @@ export default function MachinesInServicePage() {
                                       <div>
                                         <p className="text-muted-foreground">Service démarré le</p>
                                         <p className="font-medium">
-                                          {formatDateTime(notification.triggeredAt)}
+                                          {formatDateTime(serviceRecord.startedAt)}
                                         </p>
                                       </div>
                                     </div>
                                   </div>
                                   <Button
                                     onClick={() =>
-                                      setSelectedNotification({
-                                        notificationId: notification.id,
+                                      setSelectedService({
+                                        serviceRecordId: serviceRecord.id,
                                         machineId: machine.id,
                                         maintenanceId: maintenance.id,
                                         maintenanceName: maintenance.name,
@@ -295,22 +309,47 @@ export default function MachinesInServicePage() {
                       </div>
                     </div>
 
-                    {/* Service History (using maintenance.lastReplacementDate) */}
+                    {/* Service History (using ServiceRecord) */}
                     <div>
                       <h3 className="text-lg font-semibold mb-3">Historique des services</h3>
-                      <div className="space-y-2 text-sm">
-                        {machine.maintenances.map((maintenance) => (
-                          <div key={maintenance.id} className="flex items-center justify-between p-2 rounded border">
-                            <div>
-                              <p className="font-medium">{maintenance.name}</p>
-                              <p className="text-muted-foreground text-xs">
-                                Dernier remplacement: {formatDate(maintenance.lastReplacementDate)}
-                              </p>
-                            </div>
-                            <Badge variant="outline">{getServiceTypeLabel(maintenance.type)}</Badge>
-                          </div>
-                        ))}
-                      </div>
+                      {machine.maintenances.some((m) => 
+                        m.serviceRecords.some((sr) => sr.status === "COMPLETED")
+                      ) ? (
+                        <div className="space-y-2 text-sm">
+                          {machine.maintenances.map((maintenance) => {
+                            const completedRecords = maintenance.serviceRecords.filter(
+                              (sr) => sr.status === "COMPLETED"
+                            )
+                            if (completedRecords.length === 0) return null
+
+                            return (
+                              <div key={maintenance.id} className="space-y-2">
+                                <div className="font-medium text-base mb-2">{maintenance.name}</div>
+                                {completedRecords.map((record) => (
+                                  <div
+                                    key={record.id}
+                                    className="flex items-start justify-between p-3 rounded border bg-muted/50"
+                                  >
+                                    <div className="flex-1">
+                                      <p className="text-muted-foreground text-xs mb-1">
+                                        Complété le: {formatDateTime(record.completedAt || "")}
+                                      </p>
+                                      {record.comment && (
+                                        <p className="text-sm mt-1 italic">"{record.comment}"</p>
+                                      )}
+                                    </div>
+                                    <Badge variant="outline">{getServiceTypeLabel(maintenance.type)}</Badge>
+                                  </div>
+                                ))}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">
+                          Aucun historique de service disponible.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -321,10 +360,10 @@ export default function MachinesInServicePage() {
       )}
 
       {/* Service Done Modal */}
-      {selectedNotification && (
+      {selectedService && (
         <ServiceDoneModal
-          maintenanceName={selectedNotification.maintenanceName}
-          onClose={() => setSelectedNotification(null)}
+          maintenanceName={selectedService.maintenanceName}
+          onClose={() => setSelectedService(null)}
           onSubmit={handleServiceDone}
           processing={processing}
         />
@@ -341,7 +380,7 @@ function ServiceDoneModal({
 }: {
   maintenanceName: string
   onClose: () => void
-  onSubmit: (data: { lastReplacementDate: string }) => void
+  onSubmit: (data: { lastReplacementDate: string; comment?: string }) => void
   processing: boolean
 }) {
   const {
@@ -351,6 +390,7 @@ function ServiceDoneModal({
   } = useForm({
     defaultValues: {
       lastReplacementDate: new Date().toISOString().split("T")[0],
+      comment: "",
     },
   })
 
@@ -379,6 +419,22 @@ function ServiceDoneModal({
                 {errors.lastReplacementDate && (
                   <p className="text-sm text-red-600 dark:text-red-400 mt-1">
                     {errors.lastReplacementDate.message}
+                  </p>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="comment">Commentaire (optionnel)</FieldLabel>
+                <Input
+                  id="comment"
+                  type="text"
+                  placeholder="Ajouter un commentaire sur le service effectué..."
+                  {...register("comment")}
+                  disabled={processing}
+                />
+                {errors.comment && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                    {errors.comment.message}
                   </p>
                 )}
               </Field>

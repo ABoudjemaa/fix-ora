@@ -54,10 +54,22 @@ export async function POST(
       },
     });
 
+    // Créer un ServiceRecord pour l'historique
+    const serviceRecord = await prisma.serviceRecord.create({
+      data: {
+        machineId: notification.machineId,
+        maintenanceId: notification.maintenanceId,
+        notificationId: id,
+        status: "IN_PROGRESS",
+        startedAt: new Date(),
+      },
+    });
+
     return NextResponse.json(
       {
         message: "Service démarré",
         notification: updatedNotification,
+        serviceRecord: serviceRecord,
       },
       { status: 200 }
     );

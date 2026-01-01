@@ -72,6 +72,7 @@ model Machine {
 
   maintenances           Maintenance[]
   notifications          Notification[]
+  serviceRecords         ServiceRecord[]
 
   createdAtRecord        DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
@@ -94,6 +95,7 @@ model Maintenance {
   updatedAt               DateTime        @updatedAt
 
   notifications           Notification[]
+  serviceRecords          ServiceRecord[]
 
   @@index([machineId])
   @@map("maintenances")
@@ -114,9 +116,36 @@ model Notification {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
+  serviceRecords  ServiceRecord[]
+
   @@index([machineId])
   @@index([status])
   @@index([urgency])
   @@index([maintenanceId, status])
   @@map("notifications")
+}
+
+model ServiceRecord {
+  id              String            @id @default(uuid())
+  machineId       String
+  maintenanceId   String
+  notificationId  String?
+  
+  startedAt       DateTime          @default(now())
+  completedAt    DateTime?
+  comment         String?
+  status          String            @default("IN_PROGRESS") // "IN_PROGRESS" | "COMPLETED"
+  
+  machine         Machine           @relation(fields: [machineId], references: [id], onDelete: Cascade)
+  maintenance     Maintenance       @relation(fields: [maintenanceId], references: [id], onDelete: Cascade)
+  notification    Notification?     @relation(fields: [notificationId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([machineId])
+  @@index([maintenanceId])
+  @@index([status])
+  @@index([notificationId])
+  @@map("service_records")
 }

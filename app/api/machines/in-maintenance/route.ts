@@ -18,16 +18,16 @@ export async function GET() {
     
     if (!companyId) {
       return NextResponse.json(
-        { error: "Accès refusé. Seules les entreprises peuvent accéder aux machines en service." },
+        { error: "Accès refusé. Seules les entreprises peuvent accéder aux machines en maintenance." },
         { status: 403 }
       );
     }
 
-    // Récupérer toutes les machines qui ont au moins un ServiceRecord avec status = IN_PROGRESS
+    // Récupérer toutes les machines qui ont au moins un MaintenanceRecord avec status = IN_PROGRESS
     const machines = await prisma.machine.findMany({
       where: {
         companyId: companyId,
-        serviceRecords: {
+        maintenanceRecords: {
           some: {
             status: "IN_PROGRESS",
           },
@@ -38,13 +38,13 @@ export async function GET() {
           include: {
             notifications: {
               where: {
-                status: "SERVICE_STARTED",
+                status: "MAINTENANCE_STARTED",
               },
               orderBy: {
                 triggeredAt: "desc",
               },
             },
-            serviceRecords: {
+            maintenanceRecords: {
               orderBy: {
                 startedAt: "desc",
               },
@@ -65,9 +65,9 @@ export async function GET() {
 
     return NextResponse.json({ machines }, { status: 200 });
   } catch (error) {
-    console.error("Erreur lors de la récupération des machines en service:", error);
+    console.error("Erreur lors de la récupération des machines en maintenance:", error);
     return NextResponse.json(
-      { error: "Une erreur est survenue lors de la récupération des machines en service" },
+      { error: "Une erreur est survenue lors de la récupération des machines en maintenance" },
       { status: 500 }
     );
   }

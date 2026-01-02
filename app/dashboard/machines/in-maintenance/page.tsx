@@ -29,10 +29,10 @@ type Machine = {
     notifications: {
       id: string
       urgency: "APPROACHING" | "REQUIRED"
-      status: "SERVICE_STARTED"
+      status: "MAINTENANCE_STARTED"
       triggeredAt: string
     }[]
-    serviceRecords: {
+    maintenanceRecords: {
       id: string
       startedAt: string
       completedAt: string | null
@@ -46,13 +46,13 @@ type Machine = {
   }
 }
 
-export default function MachinesInServicePage() {
+export default function MachinesInMaintenancePage() {
   const router = useRouter()
   const [machines, setMachines] = useState<Machine[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedService, setSelectedService] = useState<{
-    serviceRecordId: string
+  const [selectedMaintenance, setSelectedMaintenance] = useState<{
+    maintenanceRecordId: string
     machineId: string
     maintenanceId: string
     maintenanceName: string
@@ -67,9 +67,9 @@ export default function MachinesInServicePage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch("/api/machines/in-service")
+      const response = await fetch("/api/machines/in-maintenance")
       if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des machines en service")
+        throw new Error("Erreur lors de la récupération des machines en maintenance")
       }
       const data = await response.json()
       setMachines(data.machines || [])
@@ -80,8 +80,8 @@ export default function MachinesInServicePage() {
     }
   }
 
-  const handleServiceDone = async (data: { lastReplacementDate: string; comment?: string }) => {
-    if (!selectedService) return
+  const handleMaintenanceDone = async (data: { lastReplacementDate: string; comment?: string }) => {
+    if (!selectedMaintenance) return
 
     setProcessing(true)
     setError(null)
@@ -90,7 +90,7 @@ export default function MachinesInServicePage() {
       // Convert date string to ISO format for API
       const dateValue = new Date(data.lastReplacementDate).toISOString()
       const response = await fetch(
-        `/api/services/${selectedService.serviceRecordId}/complete`,
+        `/api/maintenances/${selectedMaintenance.maintenanceRecordId}/complete`,
         {
           method: "POST",
           headers: {
@@ -105,11 +105,11 @@ export default function MachinesInServicePage() {
 
       if (!response.ok) {
         const result = await response.json()
-        throw new Error(result.error || "Erreur lors de la finalisation du service")
+        throw new Error(result.error || "Erreur lors de la finalisation de la maintenance")
       }
 
       // Close modal and refresh
-      setSelectedService(null)
+      setSelectedMaintenance(null)
       await fetchMachines()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue")
@@ -136,7 +136,7 @@ export default function MachinesInServicePage() {
     })
   }
 
-  const getServiceTypeLabel = (type: "PART" | "OIL") => {
+  const getMaintenanceTypeLabel = (type: "PART" | "OIL") => {
     return type === "PART" ? "Pièce" : "Huile"
   }
 
@@ -152,9 +152,9 @@ export default function MachinesInServicePage() {
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0 md:p-6 md:pt-0">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Machines en service</h1>
+          <h1 className="text-2xl font-bold">Machines en maintenance</h1>
           <p className="text-muted-foreground text-sm">
-            Machines avec des services de maintenance en cours
+            Machines avec des maintenances en cours
           </p>
         </div>
         <div className="flex gap-2">
@@ -196,7 +196,7 @@ export default function MachinesInServicePage() {
           <CardContent className="p-6">
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <CheckCircle2 className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Aucune machine en service</h3>
+              <h3 className="text-lg font-semibold mb-2">Aucune machine en maintenance</h3>
               <p className="text-muted-foreground">
                 Toutes les machines sont à jour.
               </p>
@@ -206,8 +206,8 @@ export default function MachinesInServicePage() {
       ) : (
         <div className="space-y-6">
           {machines.map((machine) => {
-            const servicesInProgress = machine.maintenances.filter(
-              (m) => m.serviceRecords && m.serviceRecords.some((sr) => sr.status === "IN_PROGRESS")
+            const maintenancesInProgress = machine.maintenances.filter(
+              (m) => m.maintenanceRecords && m.maintenanceRecords.some((mr) => mr.status === "IN_PROGRESS")
             )
 
             return (
@@ -217,7 +217,7 @@ export default function MachinesInServicePage() {
                     <div>
                       <CardTitle className="text-xl">{machine.name}</CardTitle>
                       <CardDescription>
-                        {machine.serialNumber} • {servicesInProgress.length} service(s) en cours
+                        {machine.serialNumber} • {maintenancesInProgress.length} maintenance(s) en cours
                       </CardDescription>
                     </div>
                     <Button
@@ -243,16 +243,16 @@ export default function MachinesInServicePage() {
                       </div>
                     </div>
 
-                    {/* Required Services */}
+                    {/* Required Maintenances */}
                     <div>
-                      <h3 className="text-lg font-semibold mb-3">Services requis</h3>
+                      <h3 className="text-lg font-semibold mb-3">Maintenances requises</h3>
                       <div className="space-y-3">
-                        {servicesInProgress.map((maintenance) => {
-                          const serviceRecord = maintenance.serviceRecords.find(
-                            (sr) => sr.status === "IN_PROGRESS"
+                        {maintenancesInProgress.map((maintenance) => {
+                          const maintenanceRecord = maintenance.maintenanceRecords.find(
+                            (mr) => mr.status === "IN_PROGRESS"
                           )
                           const notification = maintenance.notifications[0]
-                          if (!serviceRecord) return null
+                          if (!maintenanceRecord) return null
                           
                           return (
                             <Card key={maintenance.id} className="border-l-4 border-l-orange-500">
@@ -262,7 +262,7 @@ export default function MachinesInServicePage() {
                                     <div className="flex items-center gap-2 mb-2">
                                       <h4 className="font-semibold">{maintenance.name}</h4>
                                       <Badge variant="outline">
-                                        {getServiceTypeLabel(maintenance.type)}
+                                        {getMaintenanceTypeLabel(maintenance.type)}
                                       </Badge>
                                       {notification && (
                                         <Badge variant={getUrgencyVariant(notification.urgency)}>
@@ -282,24 +282,24 @@ export default function MachinesInServicePage() {
                                         </p>
                                       </div>
                                       <div>
-                                        <p className="text-muted-foreground">Service démarré le</p>
+                                        <p className="text-muted-foreground">Maintenance démarrée le</p>
                                         <p className="font-medium">
-                                          {formatDateTime(serviceRecord.startedAt)}
+                                          {formatDateTime(maintenanceRecord.startedAt)}
                                         </p>
                                       </div>
                                     </div>
                                   </div>
                                   <Button
                                     onClick={() =>
-                                      setSelectedService({
-                                        serviceRecordId: serviceRecord.id,
+                                      setSelectedMaintenance({
+                                        maintenanceRecordId: maintenanceRecord.id,
                                         machineId: machine.id,
                                         maintenanceId: maintenance.id,
                                         maintenanceName: maintenance.name,
                                       })
                                     }
                                   >
-                                    Service terminé
+                                    Maintenance terminée
                                   </Button>
                                 </div>
                               </CardContent>
@@ -309,16 +309,16 @@ export default function MachinesInServicePage() {
                       </div>
                     </div>
 
-                    {/* Service History (using ServiceRecord) */}
+                    {/* Maintenance History (using MaintenanceRecord) */}
                     <div>
-                      <h3 className="text-lg font-semibold mb-3">Historique des services</h3>
+                      <h3 className="text-lg font-semibold mb-3">Historique des maintenances</h3>
                       {machine.maintenances.some((m) => 
-                        m.serviceRecords.some((sr) => sr.status === "COMPLETED")
+                        m.maintenanceRecords.some((mr) => mr.status === "COMPLETED")
                       ) ? (
                         <div className="space-y-2 text-sm">
                           {machine.maintenances.map((maintenance) => {
-                            const completedRecords = maintenance.serviceRecords.filter(
-                              (sr) => sr.status === "COMPLETED"
+                            const completedRecords = maintenance.maintenanceRecords.filter(
+                              (mr) => mr.status === "COMPLETED"
                             )
                             if (completedRecords.length === 0) return null
 
@@ -338,7 +338,7 @@ export default function MachinesInServicePage() {
                                         <p className="text-sm mt-1 italic">"{record.comment}"</p>
                                       )}
                                     </div>
-                                    <Badge variant="outline">{getServiceTypeLabel(maintenance.type)}</Badge>
+                                    <Badge variant="outline">{getMaintenanceTypeLabel(maintenance.type)}</Badge>
                                   </div>
                                 ))}
                               </div>
@@ -347,7 +347,7 @@ export default function MachinesInServicePage() {
                         </div>
                       ) : (
                         <p className="text-muted-foreground text-sm">
-                          Aucun historique de service disponible.
+                          Aucun historique de maintenance disponible.
                         </p>
                       )}
                     </div>
@@ -359,12 +359,12 @@ export default function MachinesInServicePage() {
         </div>
       )}
 
-      {/* Service Done Modal */}
-      {selectedService && (
-        <ServiceDoneModal
-          maintenanceName={selectedService.maintenanceName}
-          onClose={() => setSelectedService(null)}
-          onSubmit={handleServiceDone}
+      {/* Maintenance Done Modal */}
+      {selectedMaintenance && (
+        <MaintenanceDoneModal
+          maintenanceName={selectedMaintenance.maintenanceName}
+          onClose={() => setSelectedMaintenance(null)}
+          onSubmit={handleMaintenanceDone}
           processing={processing}
         />
       )}
@@ -372,7 +372,7 @@ export default function MachinesInServicePage() {
   )
 }
 
-function ServiceDoneModal({
+function MaintenanceDoneModal({
   maintenanceName,
   onClose,
   onSubmit,
@@ -398,9 +398,9 @@ function ServiceDoneModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <Card className="w-full max-w-md m-4">
         <CardHeader>
-          <CardTitle>Service terminé</CardTitle>
+          <CardTitle>Maintenance terminée</CardTitle>
           <CardDescription>
-            Marquer le service "{maintenanceName}" comme terminé
+            Marquer la maintenance "{maintenanceName}" comme terminée
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -428,7 +428,7 @@ function ServiceDoneModal({
                 <Input
                   id="comment"
                   type="text"
-                  placeholder="Ajouter un commentaire sur le service effectué..."
+                  placeholder="Ajouter un commentaire sur la maintenance effectuée..."
                   {...register("comment")}
                   disabled={processing}
                 />

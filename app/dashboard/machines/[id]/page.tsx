@@ -29,7 +29,7 @@ type Machine = {
     notifications: {
       id: string
       urgency: "APPROACHING" | "REQUIRED"
-      status: "ACTIVE" | "SERVICE_STARTED"
+      status: "ACTIVE" | "MAINTENANCE_STARTED"
     }[]
   }[]
   company: {
@@ -104,21 +104,21 @@ export default function MachineDetailsPage() {
     return type === "PART" ? "default" : "secondary"
   }
 
-  const handleStartService = async (notificationId: string) => {
+  const handleStartMaintenance = async (notificationId: string) => {
     setProcessing(notificationId)
     setError(null)
     setSuccess(null)
     try {
-      const response = await fetch(`/api/notifications/${notificationId}/start-service`, {
+      const response = await fetch(`/api/notifications/${notificationId}/start-maintenance`, {
         method: "POST",
       })
 
       if (!response.ok) {
         const result = await response.json()
-        throw new Error(result.error || "Erreur lors du démarrage du service")
+        throw new Error(result.error || "Erreur lors du démarrage de la maintenance")
       }
 
-      setSuccess("Service démarré avec succès")
+      setSuccess("Maintenance démarrée avec succès")
       // Refresh machine data
       const id = params.id as string
       const machineResponse = await fetch(`/api/machines/${id}`)
@@ -355,16 +355,16 @@ export default function MachineDetailsPage() {
                             {maintenance.notifications && maintenance.notifications.length > 0 && (
                               <div className="flex items-center gap-2 rounded-md bg-red-50 p-2 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
                                 <AlertCircle className="h-4 w-4" />
-                                <span>Service requis</span>
+                                <span>Maintenance requise</span>
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => handleStartService(maintenance.notifications[0].id)}
+                                  onClick={() => handleStartMaintenance(maintenance.notifications[0].id)}
                                   disabled={processing === maintenance.notifications[0].id}
                                   className="ml-auto"
                                 >
                                   <Play className="mr-2 h-3 w-3" />
-                                  {processing === maintenance.notifications[0].id ? "Traitement..." : "Démarrer le service"}
+                                  {processing === maintenance.notifications[0].id ? "Traitement..." : "Démarrer la maintenance"}
                                 </Button>
                               </div>
                             )}

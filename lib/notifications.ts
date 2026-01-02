@@ -23,10 +23,10 @@ export function evaluateNotification(
   const now = new Date();
   const hoursSinceLastReplacement = (now.getTime() - lastReplacementDate.getTime()) / (1000 * 60 * 60);
   
-  // Calculate when service is due (hours since replacement)
+  // Calculate when maintenance is due (hours since replacement)
   const hoursUntilDue = replacementIntervalHours - hoursSinceLastReplacement;
   
-  // Check if service is required (overdue)
+  // Check if maintenance is required (overdue)
   if (hoursSinceLastReplacement >= replacementIntervalHours) {
     const hoursOverdue = hoursSinceLastReplacement - replacementIntervalHours;
     return {
@@ -54,7 +54,7 @@ export function evaluateNotification(
 export async function createOrUpdateNotification(
   machineId: string,
   maintenanceId: string,
-  serviceType: "PART" | "OIL",
+  maintenanceType: "PART" | "OIL",
   urgency: "APPROACHING" | "REQUIRED"
 ) {
   // Check if active notification exists
@@ -84,7 +84,7 @@ export async function createOrUpdateNotification(
     data: {
       machineId,
       maintenanceId,
-      serviceType,
+      maintenanceType,
       urgency,
       status: "ACTIVE",
     },
@@ -152,7 +152,7 @@ export async function evaluateMachineNotifications(machineId: string) {
           data: {
             machineId,
             maintenanceId: maintenance.id,
-            serviceType: maintenance.type,
+            maintenanceType: maintenance.type,
             urgency: evaluation.urgency,
             status: "ACTIVE",
           },
@@ -166,7 +166,7 @@ export async function evaluateMachineNotifications(machineId: string) {
         });
       }
     } else {
-      // If no notification needed, mark any existing active notification as SERVICE_STARTED
+      // If no notification needed, mark any existing active notification as MAINTENANCE_STARTED
       // (operating hours may have decreased or maintenance was updated)
       await prisma.notification.updateMany({
         where: {
@@ -174,10 +174,10 @@ export async function evaluateMachineNotifications(machineId: string) {
           status: "ACTIVE",
         },
         data: {
-          status: "SERVICE_STARTED",
+          status: "MAINTENANCE_STARTED",
         },
       });
-      // When lastReplacementDate is updated (service completed), delete SERVICE_STARTED notifications
+      // When lastReplacementDate is updated (maintenance completed), delete MAINTENANCE_STARTED notifications
       // This is handled separately when maintenance is updated
     }
   }
@@ -200,11 +200,11 @@ async function sendNotificationEmail(
   // For now, just log the notification
   console.log("📧 Notification Email:", {
     to: machine.company?.user?.email || "company@example.com",
-    subject: `Service ${notification.urgency === "REQUIRED" ? "Required" : "Approaching"}: ${machine.name} - ${maintenance.name}`,
+    subject: `Maintenance ${notification.urgency === "REQUIRED" ? "Required" : "Approaching"}: ${machine.name} - ${maintenance.name}`,
     body: `
 Machine: ${machine.name}
 Maintenance: ${maintenance.name}
-Service Type: ${notification.serviceType}
+Maintenance Type: ${notification.maintenanceType}
 Urgency: ${notification.urgency}
 Operating Hours: ${machine.operatingHours}
 Replacement Interval: ${maintenance.replacementIntervalHours} hours

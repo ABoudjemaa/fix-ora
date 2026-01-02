@@ -21,7 +21,7 @@ export async function POST(
     
     if (!companyId) {
       return NextResponse.json(
-        { error: "Accès refusé. Seules les entreprises peuvent démarrer un service." },
+        { error: "Accès refusé. Seules les entreprises peuvent démarrer une maintenance." },
         { status: 403 }
       );
     }
@@ -46,16 +46,16 @@ export async function POST(
       );
     }
 
-    // Marquer la notification comme SERVICE_STARTED
+    // Marquer la notification comme MAINTENANCE_STARTED
     const updatedNotification = await prisma.notification.update({
       where: { id },
       data: {
-        status: "SERVICE_STARTED",
+        status: "MAINTENANCE_STARTED",
       },
     });
 
-    // Créer un ServiceRecord pour l'historique
-    const serviceRecord = await prisma.serviceRecord.create({
+    // Créer un MaintenanceRecord pour l'historique
+    const maintenanceRecord = await prisma.maintenanceRecord.create({
       data: {
         machineId: notification.machineId,
         maintenanceId: notification.maintenanceId,
@@ -67,16 +67,16 @@ export async function POST(
 
     return NextResponse.json(
       {
-        message: "Service démarré",
+        message: "Maintenance démarrée",
         notification: updatedNotification,
-        serviceRecord: serviceRecord,
+        maintenanceRecord: maintenanceRecord,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Erreur lors du démarrage du service:", error);
+    console.error("Erreur lors du démarrage de la maintenance:", error);
     return NextResponse.json(
-      { error: "Une erreur est survenue lors du démarrage du service" },
+      { error: "Une erreur est survenue lors du démarrage de la maintenance" },
       { status: 500 }
     );
   }

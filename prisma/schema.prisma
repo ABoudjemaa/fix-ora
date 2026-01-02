@@ -57,7 +57,7 @@ enum NotificationUrgency {
 
 enum NotificationStatus {
   ACTIVE
-  SERVICE_STARTED
+  MAINTENANCE_STARTED
 }
 
 model Machine {
@@ -72,7 +72,7 @@ model Machine {
 
   maintenances           Maintenance[]
   notifications          Notification[]
-  serviceRecords         ServiceRecord[]
+  maintenanceRecords     MaintenanceRecord[]
 
   createdAtRecord        DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
@@ -95,7 +95,7 @@ model Maintenance {
   updatedAt               DateTime        @updatedAt
 
   notifications           Notification[]
-  serviceRecords          ServiceRecord[]
+  maintenanceRecords      MaintenanceRecord[]
 
   @@index([machineId])
   @@map("maintenances")
@@ -105,7 +105,7 @@ model Notification {
   id              String            @id @default(uuid())
   machineId       String
   maintenanceId   String
-  serviceType     MaintenanceType
+  maintenanceType MaintenanceType
   urgency         NotificationUrgency
   status          NotificationStatus @default(ACTIVE)
   triggeredAt     DateTime          @default(now())
@@ -116,7 +116,7 @@ model Notification {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
-  serviceRecords  ServiceRecord[]
+  maintenanceRecords  MaintenanceRecord[]
 
   @@index([machineId])
   @@index([status])
@@ -125,7 +125,7 @@ model Notification {
   @@map("notifications")
 }
 
-model ServiceRecord {
+model MaintenanceRecord {
   id              String            @id @default(uuid())
   machineId       String
   maintenanceId   String
@@ -147,5 +147,5 @@ model ServiceRecord {
   @@index([maintenanceId])
   @@index([status])
   @@index([notificationId])
-  @@map("service_records")
+  @@map("maintenance_records")
 }

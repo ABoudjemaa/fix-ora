@@ -147,11 +147,11 @@ export async function PUT(
     // Re-evaluate notifications if lastReplacementDate was updated
     if (validatedData.lastReplacementDate !== undefined) {
       await evaluateMachineNotifications(id);
-      // Delete SERVICE_STARTED notifications for this maintenance (service completed)
+      // Delete MAINTENANCE_STARTED notifications for this maintenance (maintenance completed)
       await prisma.notification.deleteMany({
         where: {
           maintenanceId: maintenanceId,
-          status: "SERVICE_STARTED",
+          status: "MAINTENANCE_STARTED",
         },
       });
     }

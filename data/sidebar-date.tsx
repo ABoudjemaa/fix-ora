@@ -1,4 +1,5 @@
 import {
+  Settings2,
   Computer,
   Bell,
 } from "lucide-react";
@@ -20,8 +21,8 @@ export const sidebarData = {
           url: "/dashboard/machines/add",
         },
         {
-          title: "Machines en service",
-          url: "/dashboard/machines/in-service",
+          title: "Machines en maintenance",
+          url: "/dashboard/machines/in-maintenance",
         },
       ],
     },

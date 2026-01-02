@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { evaluateMachineNotifications } from "@/lib/notifications";
 
-const completeServiceSchema = z.object({
+const completeMaintenanceSchema = z.object({
   lastReplacementDate: z
     .string()
     .min(1, "La date du dernier remplacement est requise")
@@ -17,7 +17,7 @@ const completeServiceSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ serviceRecordId: string }> }
+  { params }: { params: Promise<{ maintenanceRecordId: string }> }
 ) {
   try {
     // Vérifier l'authentification
@@ -34,21 +34,21 @@ export async function POST(
     
     if (!companyId) {
       return NextResponse.json(
-        { error: "Accès refusé. Seules les entreprises peuvent compléter un service." },
+        { error: "Accès refusé. Seules les entreprises peuvent compléter une maintenance." },
         { status: 403 }
       );
     }
 
-    const { serviceRecordId } = await params;
+    const { maintenanceRecordId } = await params;
     const body = await request.json();
 
     // Validation
-    const validatedData = completeServiceSchema.parse(body);
+    const validatedData = completeMaintenanceSchema.parse(body);
 
-    // Vérifier que le ServiceRecord existe et appartient à l'entreprise
-    const serviceRecord = await prisma.serviceRecord.findFirst({
+    // Vérifier que le MaintenanceRecord existe et appartient à l'entreprise
+    const maintenanceRecord = await prisma.maintenanceRecord.findFirst({
       where: {
-        id: serviceRecordId,
+        id: maintenanceRecordId,
         status: "IN_PROGRESS",
         machine: {
           companyId: companyId,
@@ -60,24 +60,24 @@ export async function POST(
       },
     });
 
-    if (!serviceRecord) {
+    if (!maintenanceRecord) {
       return NextResponse.json(
-        { error: "Service non trouvé ou déjà complété" },
+        { error: "Maintenance non trouvée ou déjà complétée" },
         { status: 404 }
       );
     }
 
     // Mettre à jour la maintenance avec la nouvelle date de remplacement
     await prisma.maintenance.update({
-      where: { id: serviceRecord.maintenanceId },
+      where: { id: maintenanceRecord.maintenanceId },
       data: {
         lastReplacementDate: validatedData.lastReplacementDate,
       },
     });
 
-    // Marquer le ServiceRecord comme complété
-    const completedServiceRecord = await prisma.serviceRecord.update({
-      where: { id: serviceRecordId },
+    // Marquer le MaintenanceRecord comme complété
+    const completedMaintenanceRecord = await prisma.maintenanceRecord.update({
+      where: { id: maintenanceRecordId },
       data: {
         status: "COMPLETED",
         completedAt: new Date(),
@@ -86,22 +86,22 @@ export async function POST(
     });
 
     // Supprimer la notification associée si elle existe
-    if (serviceRecord.notificationId) {
+    if (maintenanceRecord.notificationId) {
       await prisma.notification.deleteMany({
         where: {
-          id: serviceRecord.notificationId,
-          status: "SERVICE_STARTED",
+          id: maintenanceRecord.notificationId,
+          status: "MAINTENANCE_STARTED",
         },
       });
     }
 
     // Ré-évaluer les notifications pour cette machine
-    await evaluateMachineNotifications(serviceRecord.machineId);
+    await evaluateMachineNotifications(maintenanceRecord.machineId);
 
     return NextResponse.json(
       {
-        message: "Service complété avec succès",
-        serviceRecord: completedServiceRecord,
+        message: "Maintenance complétée avec succès",
+        maintenanceRecord: completedMaintenanceRecord,
       },
       { status: 200 }
     );
@@ -113,9 +113,9 @@ export async function POST(
       );
     }
 
-    console.error("Erreur lors de la complétion du service:", error);
+    console.error("Erreur lors de la complétion de la maintenance:", error);
     return NextResponse.json(
-      { error: "Une erreur est survenue lors de la complétion du service" },
+      { error: "Une erreur est survenue lors de la complétion de la maintenance" },
       { status: 500 }
     );
   }

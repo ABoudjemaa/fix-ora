@@ -10,9 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 type Notification = {
   id: string
-  serviceType: "PART" | "OIL"
+  maintenanceType: "PART" | "OIL"
   urgency: "APPROACHING" | "REQUIRED"
-  status: "ACTIVE" | "SERVICE_STARTED"
+  status: "ACTIVE" | "MAINTENANCE_STARTED"
   triggeredAt: string
   machine: {
     id: string
@@ -57,16 +57,16 @@ export default function NotificationsPage() {
     }
   }
 
-  const handleStartService = async (notificationId: string) => {
+  const handleStartMaintenance = async (notificationId: string) => {
     setProcessing(notificationId)
     try {
-      const response = await fetch(`/api/notifications/${notificationId}/start-service`, {
+      const response = await fetch(`/api/notifications/${notificationId}/start-maintenance`, {
         method: "POST",
       })
 
       if (!response.ok) {
         const result = await response.json()
-        throw new Error(result.error || "Erreur lors du démarrage du service")
+        throw new Error(result.error || "Erreur lors du démarrage de la maintenance")
       }
 
       // Remove notification from list
@@ -96,7 +96,7 @@ export default function NotificationsPage() {
     return urgency === "REQUIRED" ? "Requis" : "Approche"
   }
 
-  const getServiceTypeLabel = (type: "PART" | "OIL") => {
+  const getMaintenanceTypeLabel = (type: "PART" | "OIL") => {
     return type === "PART" ? "Pièce" : "Huile"
   }
 
@@ -115,7 +115,7 @@ export default function NotificationsPage() {
         <div>
           <h1 className="text-2xl font-bold">Notifications</h1>
           <p className="text-muted-foreground text-sm">
-            Services de maintenance à effectuer
+            Maintenances à effectuer
           </p>
         </div>
         <Button variant="outline" onClick={fetchNotifications}>
@@ -153,7 +153,7 @@ export default function NotificationsPage() {
               <CheckCircle2 className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Aucune notification</h3>
               <p className="text-muted-foreground">
-                Tous les services de maintenance sont à jour.
+                Toutes les maintenances sont à jour.
               </p>
             </div>
           </CardContent>
@@ -184,7 +184,7 @@ export default function NotificationsPage() {
                           {getUrgencyLabel(notification.urgency)}
                         </Badge>
                         <Badge variant="outline">
-                          {getServiceTypeLabel(notification.serviceType)}
+                          {getMaintenanceTypeLabel(notification.maintenanceType)}
                         </Badge>
                       </div>
 
@@ -243,11 +243,11 @@ export default function NotificationsPage() {
 
                     <div className="flex flex-col gap-2">
                       <Button
-                        onClick={() => handleStartService(notification.id)}
+                        onClick={() => handleStartMaintenance(notification.id)}
                         disabled={processing === notification.id}
                         variant={notification.urgency === "REQUIRED" ? "default" : "outline"}
                       >
-                        {processing === notification.id ? "Traitement..." : "Démarrer le service"}
+                        {processing === notification.id ? "Traitement..." : "Démarrer la maintenance"}
                       </Button>
                       <Button
                         variant="ghost"
@@ -261,9 +261,9 @@ export default function NotificationsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => router.push("/dashboard/machines/in-service")}
+                        onClick={() => router.push("/dashboard/machines/in-maintenance")}
                       >
-                        Machines en service
+                        Machines en maintenance
                       </Button>
                     </div>
                   </div>

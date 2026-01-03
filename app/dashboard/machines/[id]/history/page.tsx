@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { AlertCircle } from "lucide-react";
 import {
@@ -14,11 +14,7 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import DataTable from "@/components/data-table";
@@ -32,28 +28,40 @@ export default function MaintenanceHistoryPage() {
     useGetMaintenanceHistory(params.id as string);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
     data: maintenanceRecords,
     columns: HistoryColumns,
+    enableFilters: true,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+    getPaginationRowModel: getPaginationRowModel(),
     state: {
       sorting,
       columnFilters,
-      columnVisibility,
-      rowSelection,
     },
   });
 
+  useEffect(() => {
+    console.log("Column filters:", columnFilters);
+    console.log("Filtered rows:", table.getFilteredRowModel().rows.length);
+    console.log("Total rows:", table.getRowModel().rows.length);
+  }, [columnFilters, table]);
+
+  useEffect(() => {
+    // Réinitialiser seulement si les données changent vraiment (nouveau chargement)
+    // Ne pas réinitialiser si c'est juste un re-render
+    if (maintenanceRecords.length > 0) {
+      table.setPageIndex(0);
+    }
+  }, [maintenanceRecords.length, table]);
+
+  useEffect(() => {
+    table.setPageIndex(0);
+  }, [columnFilters, table]);
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0 md:p-6 md:pt-0">
@@ -102,16 +110,26 @@ export default function MaintenanceHistoryPage() {
           <div className="flex items-center py-4">
             <Input
               placeholder="Filtrer par nom..."
-              value={(table.getColumn("maintenance_name")?.getFilterValue() as string) ?? ""}
+              value={
+                (table
+                  .getColumn("maintenance_name")
+                  ?.getFilterValue() as string) ?? ""
+              }
               onChange={(event) =>
-                table.getColumn("maintenance_name")?.setFilterValue(event.target.value)
+                table
+                  .getColumn("maintenance_name")
+                  ?.setFilterValue(event.target.value)
               }
               className="max-w-sm"
             />
           </div>
-          <DataTable table={table} columns={HistoryColumns} />
+          <DataTable 
+            key={`${table.getState().columnFilters.length}-${table.getState().columnFilters.map(f => f.id + f.value).join('-')}`}
+            table={table} 
+            columns={HistoryColumns} 
+          />
           <div className="py-4">
-            <DataTablePagination table={table} />
+            {/* <DataTablePagination table={table} /> */}
           </div>
         </div>
       )}

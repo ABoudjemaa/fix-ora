@@ -17,6 +17,7 @@ export const MachinesColumns = (router: { push: (path: string) => void }): Colum
 
     {
       accessorKey: "name",
+      enableColumnFilter: true,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Nom" />
       ),

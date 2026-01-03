@@ -40,6 +40,7 @@ export function useGetMaintenanceHistory(
     try {
       setLoading(true);
       setError(null);
+      console.log("fetching data");
 
       // Récupérer le nom de la machine
       const machineResponse = await fetch(`/api/machines/${machineId}`);

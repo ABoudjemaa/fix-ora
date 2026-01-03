@@ -1,7 +1,32 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { flexRender, type Table as ReactTable, type ColumnDef } from "@tanstack/react-table"
+"use client";
 
-const DataTable = <TData,>({ table, columns }: { table: ReactTable<TData>, columns: ColumnDef<TData>[] }) => {
+import { useMemo } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  flexRender,
+  type Table as ReactTable,
+  type ColumnDef,
+} from "@tanstack/react-table";
+
+const DataTable = <TData,>({
+  table,
+  columns,
+}: {
+  table: ReactTable<TData>;
+  columns: ColumnDef<TData>[];
+}) => {
+  // Utiliser useMemo avec les filtres comme dépendance pour forcer le re-render
+  const filteredRows = useMemo(() => {
+    return table.getFilteredRowModel().rows;
+  }, [table.getState().columnFilters, table.getState().globalFilter]);
+
   return (
     <div className="overflow-hidden rounded-md border">
       <Table>
@@ -24,8 +49,8 @@ const DataTable = <TData,>({ table, columns }: { table: ReactTable<TData>, colum
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
+          {filteredRows?.length ? (
+            filteredRows.map((row) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}

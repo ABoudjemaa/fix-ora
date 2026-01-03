@@ -237,7 +237,8 @@ export function MachineForm({
                   <Input
                     id="notificationAdvanceHours"
                     type="number"
-                    min="1"
+                    min="0.001"
+                    step="0.001"
                     placeholder="24"
                     {...register("notificationAdvanceHours", { valueAsNumber: true })}
                     disabled={loading}
@@ -351,7 +352,8 @@ export function MachineForm({
                           <Input
                             id={`maintenances.${index}.replacementIntervalHours`}
                             type="number"
-                            min="1"
+                            min="0.001"
+                            step="0.001"
                             placeholder="1000"
                             {...register(`maintenances.${index}.replacementIntervalHours`, {
                               valueAsNumber: true,

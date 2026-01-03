@@ -580,7 +580,8 @@ function MaintenancesManager({
                     <Input
                       id="add-interval"
                       type="number"
-                      min="1"
+                      min="0.001"
+                      step="0.001"
                       {...registerAdd("replacementIntervalHours", { valueAsNumber: true })}
                       disabled={loading}
                     />
@@ -679,7 +680,8 @@ function MaintenancesManager({
                             <Input
                               id={`edit-interval-${maintenance.id}`}
                               type="number"
-                              min="1"
+                              min="0.001"
+                              step="0.001"
                               {...registerEdit("replacementIntervalHours", { valueAsNumber: true })}
                               disabled={loading}
                             />

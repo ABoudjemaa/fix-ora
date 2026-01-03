@@ -28,7 +28,7 @@ export default function MachinesPage() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
 
-  const columns = MachinesColumns(router, refetch)
+  const columns = MachinesColumns(router)
 
   const table = useReactTable({
     data: machines,

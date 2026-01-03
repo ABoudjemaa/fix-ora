@@ -11,7 +11,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "create-user": "tsx scripts/create-user.ts"
+    "create-user": "tsx scripts/create-user.ts",
+    "cron:dev": "tsx scripts/run-cron-local.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

@@ -211,8 +211,14 @@ async function sendNotificationEmail(
   // Check if RESEND_API_KEY is configured
   if (!process.env.RESEND_API_KEY) {
     console.error("❌ RESEND_API_KEY is not configured in environment variables");
+    console.error("   Veuillez ajouter RESEND_API_KEY dans votre fichier .env");
     return;
   }
+
+  console.log(`📧 Tentative d'envoi d'email pour la notification ${notification.id}...`);
+  console.log(`   Machine: ${machine.name}`);
+  console.log(`   Maintenance: ${maintenance.name}`);
+  console.log(`   Destinataire: ${recipientEmail}`);
 
   const urgencyText = notification.urgency === "REQUIRED" ? "Requis" : "Approche";
   const urgencyColor = notification.urgency === "REQUIRED" ? "#dc2626" : "#f59e0b";
@@ -322,16 +328,20 @@ Cet email a été envoyé automatiquement par le système FixOra.
 
     if (error) {
       console.error("❌ Erreur lors de l'envoi de l'email:", error);
+      console.error("   Détails de l'erreur:", JSON.stringify(error, null, 2));
       return;
     }
 
-    console.log("✅ Email de notification envoyé avec succès:", {
-      emailId: data?.id,
-      to: recipientEmail,
-      subject: `Maintenance ${urgencyText}: ${machine.name} - ${maintenance.name}`,
-    });
+    console.log("✅ Email de notification envoyé avec succès!");
+    console.log("   Email ID:", data?.id);
+    console.log("   Destinataire:", recipientEmail);
+    console.log("   Sujet:", `Maintenance ${urgencyText}: ${machine.name} - ${maintenance.name}`);
   } catch (error) {
     console.error("❌ Erreur lors de l'envoi de l'email:", error);
+    console.error("   Type d'erreur:", error instanceof Error ? error.message : String(error));
+    if (error instanceof Error && error.stack) {
+      console.error("   Stack trace:", error.stack);
+    }
   }
 }
 

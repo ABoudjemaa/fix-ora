@@ -10,41 +10,43 @@ J'ai créé une **route API cron** qui vérifie automatiquement toutes les machi
 
 ## 🔧 Configuration
 
-### Option 1 : Vercel Cron (Recommandé si vous déployez sur Vercel)
+### ⚠️ Limitation Vercel Hobby
 
-Si vous déployez sur **Vercel**, le fichier `vercel.json` que j'ai créé configurera automatiquement un cron qui s'exécute **toutes les 5 minutes**.
+Les comptes **Vercel Hobby** sont limités à **un seul cron job par jour maximum**. Pour des vérifications plus fréquentes (toutes les 5 minutes), utilisez **GitHub Actions** (gratuit) ou un autre service externe.
 
-**Aucune configuration supplémentaire nécessaire** - ça marchera automatiquement après le déploiement !
+### Option 1 : GitHub Actions (Recommandé - Gratuit) ✅
 
-### Option 2 : Service Cron Externe
+**Solution recommandée** pour les vérifications toutes les 5 minutes.
+
+Le fichier `.github/workflows/check-notifications.yml` est déjà configuré. Il vous suffit d'ajouter les secrets GitHub :
+
+1. Allez dans votre repository GitHub
+2. **Settings** → **Secrets and variables** → **Actions**
+3. Ajoutez ces secrets :
+   - `APP_URL` : Votre URL Vercel (ex: `https://votre-app.vercel.app`)
+   - `CRON_SECRET_KEY` : La même clé que dans votre `.env` (ex: `votre-cle-secrete-123`)
+
+Le workflow s'exécutera automatiquement **toutes les 5 minutes** après le prochain push.
+
+**Avantages** :
+- ✅ Gratuit et illimité
+- ✅ Vérifications toutes les 5 minutes
+- ✅ Peut être déclenché manuellement depuis GitHub
+- ✅ Logs disponibles dans GitHub Actions
+
+### Option 2 : Vercel Cron (Backup quotidien)
+
+Le fichier `vercel.json` est configuré pour un cron **quotidien à 9h00** (compatible avec le plan Hobby). Cela sert de backup si GitHub Actions échoue.
+
+**Note** : Si vous avez un plan Vercel Pro, vous pouvez modifier `vercel.json` pour utiliser `*/5 * * * *` et désactiver GitHub Actions.
+
+### Option 3 : Autres Services Cron Externes
 
 Si vous n'êtes pas sur Vercel, vous pouvez utiliser un service externe pour appeler cette route périodiquement :
 
-#### A. GitHub Actions (Gratuit)
+#### A. Cron-Job.org (Alternative gratuite)
 
-Créez `.github/workflows/check-notifications.yml` :
-
-```yaml
-name: Check Notifications
-on:
-  schedule:
-    - cron: '*/5 * * * *'  # Toutes les 5 minutes
-  workflow_dispatch:  # Permet de déclencher manuellement
-
-jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Call API
-        run: |
-          curl -X GET "${{ secrets.APP_URL }}/api/cron/check-notifications?secret=${{ secrets.CRON_SECRET_KEY }}"
-```
-
-Dans les secrets GitHub :
-- `APP_URL` : Votre URL (ex: `https://votre-app.vercel.app`)
-- `CRON_SECRET_KEY` : Une clé secrète (ex: `votre-cle-secrete-123`)
-
-#### B. EasyCron ou Cron-Job.org (Gratuit)
+Si vous préférez ne pas utiliser GitHub Actions :
 
 1. Créez un compte sur [cron-job.org](https://cron-job.org) ou [EasyCron](https://www.easycron.com)
 2. Créez un nouveau job cron :
@@ -188,9 +190,16 @@ Format cron : `minute heure jour mois jour-semaine`
 **Avant** : Vous deviez toujours faire une action manuelle (modifier les heures d'opération, etc.)
 
 **Maintenant** : 
-- ✅ Si vous êtes sur **Vercel** : Ça marche automatiquement après déploiement
-- ✅ Si vous êtes ailleurs : Configurez un service cron externe (GitHub Actions, cron-job.org, etc.)
+- ✅ **GitHub Actions** : Vérifications automatiques toutes les 5 minutes (gratuit)
+- ✅ **Vercel Cron** : Backup quotidien à 9h00 (compatible plan Hobby)
 - ✅ Vous pouvez aussi tester manuellement en appelant la route
+
+### 📋 Checklist de configuration
+
+1. ✅ Fichier `.github/workflows/check-notifications.yml` créé
+2. ✅ Fichier `vercel.json` configuré pour un cron quotidien
+3. ⚠️ **À faire** : Ajouter les secrets GitHub (`APP_URL` et `CRON_SECRET_KEY`)
+4. ⚠️ **À faire** : Pousser les changements sur GitHub
 
 Plus besoin d'action manuelle ! 🎉
 

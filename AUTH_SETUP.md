@@ -14,12 +14,30 @@ DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
 
 # NextAuth
 AUTH_SECRET="votre-secret-key-ici"
+
+# Resend (Email Service)
+RESEND_API_KEY="re_xxxxxxxxxxxxx"
+RESEND_FROM_EMAIL="FixOra <[email protected]>"
+# Note: Utilisez une adresse email vérifiée dans votre compte Resend
+# Format: "Nom <[email protected]>" ou simplement "[email protected]"
 ```
 
 Pour générer un `AUTH_SECRET`, vous pouvez utiliser :
 ```bash
 openssl rand -base64 32
 ```
+
+### Configuration Resend (Emails)
+
+1. Créez un compte sur [Resend](https://resend.com)
+2. Obtenez votre clé API depuis le dashboard Resend
+3. Ajoutez `RESEND_API_KEY` dans votre fichier `.env`
+4. Configurez `RESEND_FROM_EMAIL` avec votre adresse email vérifiée dans Resend
+   - Format accepté: `"Nom <[email protected]>"` ou simplement `"[email protected]"`
+   - Exemple: `RESEND_FROM_EMAIL="FixOra <[email protected]>"`
+   - **Important**: Vous devez utiliser une adresse email que vous avez vérifiée dans votre compte Resend
+   - Pour le développement, vous pouvez ajouter votre email dans Resend et l'utiliser
+   - Pour la production, vous devrez vérifier votre propre domaine dans Resend
 
 ### 2. Configuration de la base de données
 

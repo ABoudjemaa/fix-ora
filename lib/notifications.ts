@@ -1,4 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import { Resend } from "resend";
+
+// Initialize Resend client
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 type NotificationEvaluationResult = {
   shouldNotify: boolean;
@@ -184,38 +188,150 @@ export async function evaluateMachineNotifications(machineId: string) {
 
   // Send emails for newly created notifications
   for (const item of notificationsCreated) {
-    await sendNotificationEmail(item.machine, item.maintenance, item.notification);
+    await sendNotificationEmail(item.machine, item.maintenance, item.notification, item.evaluation);
   }
 }
 
 /**
- * Send notification email (simple implementation - logs for now)
+ * Send notification email using Resend
  */
 async function sendNotificationEmail(
   machine: any,
   maintenance: any,
-  notification: any
+  notification: any,
+  evaluation: NotificationEvaluationResult
 ) {
-  // TODO: Implement actual email sending
-  // For now, just log the notification
-  console.log("📧 Notification Email:", {
-    to: machine.company?.user?.email || "company@example.com",
-    subject: `Maintenance ${notification.urgency === "REQUIRED" ? "Required" : "Approaching"}: ${machine.name} - ${maintenance.name}`,
-    body: `
-Machine: ${machine.name}
-Maintenance: ${maintenance.name}
-Maintenance Type: ${notification.maintenanceType}
-Urgency: ${notification.urgency}
-Operating Hours: ${machine.operatingHours}
-Replacement Interval: ${maintenance.replacementIntervalHours} hours
-Last Replacement: ${maintenance.lastReplacementDate.toLocaleDateString()}
-    `.trim(),
-  });
+  const recipientEmail = "boudjemaa.amine.2003@gmail.com";
+  
+  if (!recipientEmail) {
+    console.error("❌ No recipient email found for notification");
+    return;
+  }
 
-  // In production, use an email service like:
-  // - Resend
-  // - SendGrid
-  // - AWS SES
-  // - Nodemailer with SMTP
+  // Check if RESEND_API_KEY is configured
+  if (!process.env.RESEND_API_KEY) {
+    console.error("❌ RESEND_API_KEY is not configured in environment variables");
+    return;
+  }
+
+  const urgencyText = notification.urgency === "REQUIRED" ? "Requis" : "Approche";
+  const urgencyColor = notification.urgency === "REQUIRED" ? "#dc2626" : "#f59e0b";
+  const maintenanceTypeText = notification.maintenanceType === "PART" ? "Pièce" : "Huile";
+  
+  // Use hoursUntilDue from evaluation (negative means overdue)
+  const hoursUntilDue = Math.abs(evaluation.hoursUntilDue);
+
+  const emailHtml = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification de Maintenance</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">🔧 Notification de Maintenance</h1>
+  </div>
+  
+  <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb;">
+    <div style="background: ${urgencyColor}; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+      <h2 style="margin: 0; font-size: 20px;">Maintenance ${urgencyText}</h2>
+    </div>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+      <h3 style="margin-top: 0; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
+        Informations de la Machine
+      </h3>
+      <p style="margin: 10px 0;"><strong>Nom:</strong> ${machine.name}</p>
+      <p style="margin: 10px 0;"><strong>Numéro de série:</strong> ${machine.serialNumber}</p>
+      <p style="margin: 10px 0;"><strong>Heures d'opération:</strong> ${machine.operatingHours.toLocaleString()} heures</p>
+    </div>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+      <h3 style="margin-top: 0; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
+        Détails de la Maintenance
+      </h3>
+      <p style="margin: 10px 0;"><strong>Type de maintenance:</strong> ${maintenance.name}</p>
+      <p style="margin: 10px 0;"><strong>Catégorie:</strong> ${maintenanceTypeText}</p>
+      <p style="margin: 10px 0;"><strong>Intervalle de remplacement:</strong> ${maintenance.replacementIntervalHours.toLocaleString()} heures</p>
+      <p style="margin: 10px 0;"><strong>Dernier remplacement:</strong> ${new Date(maintenance.lastReplacementDate).toLocaleDateString('fr-FR', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })}</p>
+      ${notification.urgency === "REQUIRED" 
+        ? `<p style="margin: 10px 0; color: #dc2626;"><strong>⚠️ En retard de:</strong> ${Math.round(hoursUntilDue)} heures</p>`
+        : `<p style="margin: 10px 0; color: #f59e0b;"><strong>⏰ Maintenance due dans:</strong> ${Math.round(hoursUntilDue)} heures</p>`
+      }
+    </div>
+    
+    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px; margin-top: 20px;">
+      <p style="margin: 0; color: #92400e;">
+        <strong>Action requise:</strong> 
+        ${notification.urgency === "REQUIRED" 
+          ? "Cette maintenance est maintenant en retard. Veuillez planifier le remplacement dès que possible."
+          : "Cette maintenance approche. Veuillez planifier le remplacement prochainement."
+        }
+      </p>
+    </div>
+  </div>
+  
+  <div style="text-align: center; margin-top: 30px; color: #6b7280; font-size: 12px;">
+    <p>Cet email a été envoyé automatiquement par le système FixOra.</p>
+    <p>© ${new Date().getFullYear()} FixOra - Gestion de Maintenance</p>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  const emailText = `
+Notification de Maintenance - ${urgencyText}
+
+Machine: ${machine.name}
+Numéro de série: ${machine.serialNumber}
+Heures d'opération: ${machine.operatingHours.toLocaleString()} heures
+
+Type de maintenance: ${maintenance.name}
+Catégorie: ${maintenanceTypeText}
+Intervalle de remplacement: ${maintenance.replacementIntervalHours.toLocaleString()} heures
+Dernier remplacement: ${new Date(maintenance.lastReplacementDate).toLocaleDateString('fr-FR')}
+
+${notification.urgency === "REQUIRED" 
+  ? `⚠️ EN RETARD: Cette maintenance est maintenant en retard de ${Math.round(hoursUntilDue)} heures.`
+  : `⏰ APPROCHE: Cette maintenance est due dans ${Math.round(hoursUntilDue)} heures.`
+}
+
+Action requise: ${notification.urgency === "REQUIRED" 
+  ? "Veuillez planifier le remplacement dès que possible."
+  : "Veuillez planifier le remplacement prochainement."
+}
+
+---
+Cet email a été envoyé automatiquement par le système FixOra.
+  `.trim();
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "Acme <onboarding@resend.dev>",
+      to: [recipientEmail],
+      subject: `🔧 Maintenance ${urgencyText}: ${machine.name} - ${maintenance.name}`,
+      html: emailHtml,
+      text: emailText,
+    });
+
+    if (error) {
+      console.error("❌ Erreur lors de l'envoi de l'email:", error);
+      return;
+    }
+
+    console.log("✅ Email de notification envoyé avec succès:", {
+      emailId: data?.id,
+      to: recipientEmail,
+      subject: `Maintenance ${urgencyText}: ${machine.name} - ${maintenance.name}`,
+    });
+  } catch (error) {
+    console.error("❌ Erreur lors de l'envoi de l'email:", error);
+  }
 }
 

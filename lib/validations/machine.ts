@@ -46,8 +46,8 @@ export const machineSchema = z.object({
     .nonnegative("Le nombre d'heures d'exploitation doit être positif ou nul"),
   notificationAdvanceHours: z
     .number()
-    .int("Le nombre d'heures d'avance de notification doit être un nombre entier")
-    .positive("Le nombre d'heures d'avance de notification doit être positif"),
+    .positive("Le nombre d'heures d'avance de notification doit être positif")
+    .min(0.001, "Le nombre d'heures d'avance doit être au moins 0.001 heure (36 secondes)"),
   maintenances: z.array(maintenanceSchema).min(1, "Au moins une maintenance est requise"),
 });
 
@@ -72,8 +72,8 @@ export const machineUpdateSchema = z.object({
     .optional(),
   notificationAdvanceHours: z
     .number()
-    .int("Le nombre d'heures d'avance de notification doit être un nombre entier")
     .positive("Le nombre d'heures d'avance de notification doit être positif")
+    .min(0.001, "Le nombre d'heures d'avance doit être au moins 0.001 heure (36 secondes)")
     .optional(),
 });
 

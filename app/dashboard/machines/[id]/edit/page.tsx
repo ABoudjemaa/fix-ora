@@ -381,7 +381,8 @@ export default function EditMachinePage() {
                   <Input
                     id="notificationAdvanceHours"
                     type="number"
-                    min="1"
+                    min="0.001"
+                    step="0.001"
                     {...register("notificationAdvanceHours", { valueAsNumber: true })}
                     disabled={saving}
                     aria-invalid={errors.notificationAdvanceHours ? "true" : "false"}

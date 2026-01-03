@@ -55,7 +55,7 @@ export const MachinesColumns = (router: {
     header: ({ column }) => (
       <DataTableColumnHeader
         column={column}
-        title="Heures d'avance notification"
+        title="Heures d'avance notification" 
       />
     ),
     cell: ({ row }) => {

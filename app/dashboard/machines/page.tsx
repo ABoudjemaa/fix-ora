@@ -16,7 +16,7 @@ import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { MachinesColumns } from "@/components/machines/machines-columns"
+import { MachinesColumns } from "@/components/columns/machines-columns"
 import { useGetMachines } from "@/hooks/use-get-machines"
 import DataTable from "@/components/data-table"
 

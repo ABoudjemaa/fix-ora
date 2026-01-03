@@ -405,7 +405,6 @@ function MaintenanceDoneModal({
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="comment">Commentaire (optionnel)</FieldLabel>
-                <FieldLabel htmlFor="comment">Commentaire (optionnel)</FieldLabel>
                 <Input
                   id="comment"
                   type="text"

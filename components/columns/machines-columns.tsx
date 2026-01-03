@@ -14,28 +14,7 @@ import { MoreHorizontal } from "lucide-react"
 import { Machine } from "@prisma/client"
 
 export const MachinesColumns = (router: { push: (path: string) => void }): ColumnDef<Machine>[] => [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Sélectionner tout"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Sélectionner la ligne"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
+
     {
       accessorKey: "name",
       header: ({ column }) => (

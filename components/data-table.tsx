@@ -40,7 +40,7 @@ const DataTable = <TData,>({ table, columns }: { table: ReactTable<TData>, colum
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                Aucune machine trouvée.
+                Aucun résultat trouvé.
               </TableCell>
             </TableRow>
           )}

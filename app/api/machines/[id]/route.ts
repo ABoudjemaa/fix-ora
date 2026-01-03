@@ -56,6 +56,21 @@ export async function GET(
             crn: true,
           },
         },
+        maintenanceRecords: {
+          include: {
+            maintenance: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+              },
+            },
+          },
+          orderBy: {
+            startedAt: "desc",
+          },
+          take: 3,
+        },
       },
     });
 

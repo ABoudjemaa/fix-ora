@@ -20,6 +20,13 @@ export const maintenanceSchema = z.object({
     .transform((str) => new Date(str))
     .refine((date) => !isNaN(date.getTime()), {
       message: "Date invalide",
+    })
+    .refine((date) => {
+      const today = new Date();
+      today.setHours(23, 59, 59, 999); // Fin de la journée d'aujourd'hui
+      return date <= today;
+    }, {
+      message: "La date du dernier remplacement ne peut pas être dans le futur",
     }),
 });
 
@@ -84,6 +91,13 @@ export const maintenanceUpdateSchema = z.object({
     .transform((str) => new Date(str))
     .refine((date) => !isNaN(date.getTime()), {
       message: "Date invalide",
+    })
+    .refine((date) => {
+      const today = new Date();
+      today.setHours(23, 59, 59, 999); // Fin de la journée d'aujourd'hui
+      return date <= today;
+    }, {
+      message: "La date du dernier remplacement ne peut pas être dans le futur",
     })
     .optional(),
 });

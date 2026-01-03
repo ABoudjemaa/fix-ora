@@ -80,15 +80,14 @@ export default function MachinesInMaintenancePage() {
     }
   }
 
-  const handleMaintenanceDone = async (data: { lastReplacementDate: string; comment?: string }) => {
+  const handleMaintenanceDone = async (data: { comment?: string }) => {
     if (!selectedMaintenance) return
 
     setProcessing(true)
     setError(null)
 
     try {
-      // Convert date string to ISO format for API
-      const dateValue = new Date(data.lastReplacementDate).toISOString()
+      // La date de fin est définie automatiquement par le backend (now())
       const response = await fetch(
         `/api/maintenances/${selectedMaintenance.maintenanceRecordId}/complete`,
         {
@@ -97,7 +96,6 @@ export default function MachinesInMaintenancePage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            lastReplacementDate: dateValue,
             comment: data.comment || undefined,
           }),
         }
@@ -380,7 +378,7 @@ function MaintenanceDoneModal({
 }: {
   maintenanceName: string
   onClose: () => void
-  onSubmit: (data: { lastReplacementDate: string; comment?: string }) => void
+  onSubmit: (data: { comment?: string }) => void
   processing: boolean
 }) {
   const {
@@ -389,7 +387,6 @@ function MaintenanceDoneModal({
     formState: { errors },
   } = useForm({
     defaultValues: {
-      lastReplacementDate: new Date().toISOString().split("T")[0],
       comment: "",
     },
   })
@@ -407,23 +404,7 @@ function MaintenanceDoneModal({
           <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="lastReplacementDate">Date du remplacement</FieldLabel>
-                <Input
-                  id="lastReplacementDate"
-                  type="date"
-                  {...register("lastReplacementDate", {
-                    required: "La date est requise",
-                  })}
-                  disabled={processing}
-                />
-                {errors.lastReplacementDate && (
-                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-                    {errors.lastReplacementDate.message}
-                  </p>
-                )}
-              </Field>
-
-              <Field>
+                <FieldLabel htmlFor="comment">Commentaire (optionnel)</FieldLabel>
                 <FieldLabel htmlFor="comment">Commentaire (optionnel)</FieldLabel>
                 <Input
                   id="comment"

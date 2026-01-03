@@ -5,13 +5,6 @@ import { z } from "zod";
 import { evaluateMachineNotifications } from "@/lib/notifications";
 
 const completeMaintenanceSchema = z.object({
-  lastReplacementDate: z
-    .string()
-    .min(1, "La date du dernier remplacement est requise")
-    .transform((str) => new Date(str))
-    .refine((date) => !isNaN(date.getTime()), {
-      message: "Date invalide",
-    }),
   comment: z.string().optional(),
 });
 
@@ -67,11 +60,14 @@ export async function POST(
       );
     }
 
-    // Mettre à jour la maintenance avec la nouvelle date de remplacement
+    // Date de fin automatique : utiliser now() (ignorer toute date envoyée par le frontend)
+    const completionDate = new Date();
+
+    // Mettre à jour la maintenance avec la date de remplacement automatique
     await prisma.maintenance.update({
       where: { id: maintenanceRecord.maintenanceId },
       data: {
-        lastReplacementDate: validatedData.lastReplacementDate,
+        lastReplacementDate: completionDate,
       },
     });
 
@@ -80,7 +76,7 @@ export async function POST(
       where: { id: maintenanceRecordId },
       data: {
         status: "COMPLETED",
-        completedAt: new Date(),
+        completedAt: completionDate,
         comment: validatedData.comment || null,
       },
     });

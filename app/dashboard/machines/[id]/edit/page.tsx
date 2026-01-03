@@ -595,6 +595,7 @@ function MaintenancesManager({
                     <Input
                       id="add-date"
                       type="date"
+                      max={new Date().toISOString().split("T")[0]}
                       {...registerAdd("lastReplacementDate")}
                       disabled={loading}
                     />
@@ -695,6 +696,7 @@ function MaintenancesManager({
                             <Input
                               id={`edit-date-${maintenance.id}`}
                               type="date"
+                              max={new Date().toISOString().split("T")[0]}
                               {...registerEdit("lastReplacementDate")}
                               disabled={loading}
                             />

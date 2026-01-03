@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
-  Calendar,
   Clock,
   Hash,
   Wrench,
@@ -13,6 +12,7 @@ import {
   Play,
   History,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,9 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import DeleteMachineDialog from "@/components/dialogs/delete-machine-dialog";
+import { formatDateTime, formatDate } from "@/lib/utils";
+import { getMaintenanceTypeLabel, getMaintenanceTypeVariant } from "@/lib/utils";
 
 type Machine = {
   id: string;
@@ -75,6 +78,8 @@ export default function MachineDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
 
   useEffect(() => {
     async function fetchMachine() {
@@ -103,23 +108,6 @@ export default function MachineDetailsPage() {
     }
   }, [params.id]);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("fr-FR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString("fr-FR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const calculateNextMaintenance = (
     lastReplacementDate: string,
@@ -130,14 +118,6 @@ export default function MachineDetailsPage() {
       lastDate.getTime() + replacementIntervalHours * 60 * 60 * 1000
     );
     return nextDate;
-  };
-
-  const getMaintenanceTypeLabel = (type: "PART" | "OIL") => {
-    return type === "PART" ? "Pièce" : "Huile";
-  };
-
-  const getMaintenanceTypeVariant = (type: "PART" | "OIL") => {
-    return type === "PART" ? "default" : "secondary";
   };
 
   const handleStartMaintenance = async (notificationId: string) => {
@@ -175,6 +155,7 @@ export default function MachineDetailsPage() {
     }
   };
 
+
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0 md:p-6 md:pt-0">
       <div className="flex items-center justify-between gap-4">
@@ -186,14 +167,24 @@ export default function MachineDetailsPage() {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Retour
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => router.push(`/dashboard/machines/${params.id}/edit`)}
-        >
-          <Edit className="mr-2 h-4 w-4" />
-          Modifier
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/dashboard/machines/${params.id}/edit`)}
+          >
+            <Edit className="mr-2 h-4 w-4" />
+            Modifier
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Supprimer
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -485,23 +476,27 @@ export default function MachineDetailsPage() {
                   <History className="h-5 w-5" />
                   <CardTitle>Historique des maintenances</CardTitle>
                 </div>
-                {machine.maintenanceRecords && machine.maintenanceRecords.length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push(`/dashboard/machines/${params.id}/history`)}
-                  >
-                    Voir plus
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                )}
+                {machine.maintenanceRecords &&
+                  machine.maintenanceRecords.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        router.push(`/dashboard/machines/${params.id}/history`)
+                      }
+                    >
+                      Voir plus
+                      <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  )}
               </div>
               <CardDescription>
                 Les trois dernières maintenances effectuées
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {!machine.maintenanceRecords || machine.maintenanceRecords.length === 0 ? (
+              {!machine.maintenanceRecords ||
+              machine.maintenanceRecords.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground">
                     Aucun historique de maintenance disponible.
@@ -581,6 +576,17 @@ export default function MachineDetailsPage() {
           </Card>
         </div>
       ) : null}
+
+      {/* Dialogue de suppression */}
+      {machine && (
+      <DeleteMachineDialog
+        deleteDialogOpen={deleteDialogOpen}
+        setDeleteDialogOpen={setDeleteDialogOpen}
+        machine={{
+          id: machine.id,
+          name: machine.name
+        }}
+      />)}
     </div>
   );
 }

@@ -22,13 +22,13 @@ import DataTable from "@/components/data-table"
 
 export default function MachinesPage() {
   const router = useRouter()
-  const { machines, loading, error } = useGetMachines()
+  const { machines, loading, error, refetch } = useGetMachines()
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
 
-  const columns = MachinesColumns(router)
+  const columns = MachinesColumns(router, refetch)
 
   const table = useReactTable({
     data: machines,
